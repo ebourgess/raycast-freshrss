@@ -1,4 +1,4 @@
-import { List, Action, ActionPanel, Icon } from "@raycast/api";
+import { List, Action, ActionPanel, Icon, Image } from "@raycast/api";
 import type { Feed } from "../api/types";
 
 type FeedListProps = {
@@ -32,7 +32,11 @@ export function FeedList({ feeds, isLoading, actions, emptyTitle, emptyDescripti
             id={feed.id}
             title={feed.title}
             subtitle={feed.url || feed.htmlUrl || ""}
-            icon={Icon.Rss}
+            icon={
+              feed.iconUrl
+                ? { source: feed.iconUrl as unknown as Image.Source, fallback: Icon.Rss }
+                : { value: Icon.Rss }
+            }
             accessories={[{ text: feed.id }]}
             actions={
               <ActionPanel>

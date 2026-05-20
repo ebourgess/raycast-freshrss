@@ -1,17 +1,32 @@
 import { getPreferenceValues } from "@raycast/api";
+import { Cache } from "@raycast/api";
 import type {
   FreshRSSPreferences,
   Feed,
   Article,
+  ArticleFetchResult,
+  Category,
   FreshRSSSubscriptionListResponse,
   FreshRSSSubscription,
   FreshRSSQuickAddResponse,
   FreshRSSStreamContentsResponse,
   FreshRSSStreamItem,
+  FreshRSSTagListResponse,
 } from "./types";
 
 let cachedAuthToken: string | null = null;
 let cachedWriteToken: string | null = null;
+
+const cache = new Cache();
+
+const CACHE_KEYS = {
+  feeds: "freshrss_feeds",
+  feedsTTL: "freshrss_feeds_ttl",
+  categories: "freshrss_categories",
+  categoriesTTL: "freshrss_categories_ttl",
+} as const;
+
+const CACHE_TTL_MS = 5 * 60 * 1000;
 
 function getPreferences(): FreshRSSPreferences {
   return getPreferenceValues<FreshRSSPreferences>();
@@ -252,7 +267,30 @@ async function getToken(): Promise<string> {
   return cachedWriteToken;
 }
 
-function parseStreamItem(item: FreshRSSStreamItem): Article {
+function isCacheValid(ttlKey: string): boolean {
+  const timestamp = cache.get(ttlKey);
+  if (!timestamp) return false;
+  return Date.now() < parseInt(timestamp, 10);
+}
+
+function setCacheWithTTL(key: string, ttlKey: string, value: string): void {
+  cache.set(key, value);
+  cache.set(ttlKey, String(Date.now() + CACHE_TTL_MS));
+}
+
+function buildFeedIconMap(feeds: Feed[]): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const feed of feeds) {
+    if (feed.iconUrl && feed.id) {
+      const numericId = feed.id.replace("feed/", "");
+      map.set(numericId, feed.iconUrl);
+      map.set(feed.id, feed.iconUrl);
+    }
+  }
+  return map;
+}
+
+function parseStreamItem(item: FreshRSSStreamItem, iconMap?: Map<string, string>): Article {
   const articleUrl =
     item.alternate?.find((a: { href: string; type: string }) => a.type === "text/html")?.href ||
     item.alternate?.[0]?.href ||
@@ -268,12 +306,18 @@ function parseStreamItem(item: FreshRSSStreamItem): Article {
   const rawSummary = item.summary?.content || item.content?.content || undefined;
   const summary = rawSummary ? rawSummary.replace(/<[^>]*>/g, "").trim().slice(0, 300) : undefined;
 
+  let feedIconUrl: string | undefined;
+  if (iconMap && item.origin?.streamId) {
+    feedIconUrl = iconMap.get(item.origin.streamId);
+  }
+
   return {
     id: item.id,
     title: item.title || "Untitled",
     url: articleUrl,
     feedId: item.origin?.streamId,
     feedTitle: item.origin?.title,
+    feedIconUrl,
     author: item.author,
     publishedAt,
     updatedAt,
@@ -284,14 +328,25 @@ function parseStreamItem(item: FreshRSSStreamItem): Article {
   };
 }
 
-export async function getFeeds(): Promise<Feed[]> {
+export async function getFeeds(forceRefresh?: boolean): Promise<Feed[]> {
+  if (!forceRefresh && isCacheValid(CACHE_KEYS.feedsTTL)) {
+    const cached = cache.get(CACHE_KEYS.feeds);
+    if (cached) {
+      try {
+        return JSON.parse(cached) as Feed[];
+      } catch {
+        // cache corrupted, proceed to fetch
+      }
+    }
+  }
+
   const text = await request("/reader/api/0/subscription/list", {
     params: { output: "json" },
   });
 
   const data: FreshRSSSubscriptionListResponse = JSON.parse(text);
 
-  return (data.subscriptions || []).map((sub: FreshRSSSubscription) => ({
+  const feeds = (data.subscriptions || []).map((sub: FreshRSSSubscription) => ({
     id: sub.id,
     title: sub.title || "Untitled Feed",
     url: sub.url,
@@ -299,9 +354,76 @@ export async function getFeeds(): Promise<Feed[]> {
     iconUrl: sub.iconUrl,
     categories: sub.categories?.map((cat: { id: string; label: string }) => ({ id: cat.id, label: cat.label })),
   }));
+
+  setCacheWithTTL(CACHE_KEYS.feeds, CACHE_KEYS.feedsTTL, JSON.stringify(feeds));
+
+  return feeds;
+}
+
+export async function getCategories(): Promise<Category[]> {
+  if (isCacheValid(CACHE_KEYS.categoriesTTL)) {
+    const cached = cache.get(CACHE_KEYS.categories);
+    if (cached) {
+      try {
+        return JSON.parse(cached) as Category[];
+      } catch {
+        // cache corrupted, proceed to fetch
+      }
+    }
+  }
+
+  const text = await request("/reader/api/0/tag/list", {
+    params: { output: "json" },
+  });
+
+  const data: FreshRSSTagListResponse = JSON.parse(text);
+
+  const categories: Category[] = (data.tags || [])
+    .filter((tag: { id: string; type?: string; label?: string; unread_count?: number }) => {
+      const id = tag.id || "";
+      return id.startsWith("user/-/label/");
+    })
+    .map((tag: { id: string; type?: string; label?: string; unread_count?: number }) => ({
+      id: tag.id,
+      label: tag.label || tag.id.replace("user/-/label/", ""),
+      type: tag.type,
+      unreadCount: tag.unread_count,
+    }));
+
+  setCacheWithTTL(CACHE_KEYS.categories, CACHE_KEYS.categoriesTTL, JSON.stringify(categories));
+
+  return categories;
+}
+
+export async function getArticlesByCategory(categoryId: string, continuation?: string): Promise<ArticleFetchResult> {
+  const feeds = await getFeeds();
+  const iconMap = buildFeedIconMap(feeds);
+
+  const params: Record<string, string> = {
+    output: "json",
+    n: "50",
+  };
+
+  if (continuation) {
+    params["c"] = continuation;
+  }
+
+  const streamId = encodeURIComponent(categoryId);
+  const text = await request(`/reader/api/0/stream/contents/${streamId}`, { params });
+
+  const data: FreshRSSStreamContentsResponse = JSON.parse(text);
+  const articles = (data.items || []).map((item: FreshRSSStreamItem) => parseStreamItem(item, iconMap));
+
+  return {
+    articles,
+    continuation: data.continuation,
+  };
 }
 
 export async function addFeed(feedUrl: string): Promise<void> {
+  cache.delete(CACHE_KEYS.feeds);
+  cache.delete(CACHE_KEYS.feedsTTL);
+
   const text = await request("/reader/api/0/subscription/quickadd", {
     method: "POST",
     requireAuth: true,
@@ -325,6 +447,9 @@ export async function addFeed(feedUrl: string): Promise<void> {
 }
 
 export async function removeFeed(feedId: string): Promise<void> {
+  cache.delete(CACHE_KEYS.feeds);
+  cache.delete(CACHE_KEYS.feedsTTL);
+
   await request("/reader/api/0/subscription/edit", {
     method: "POST",
     requireAuth: true,
@@ -336,42 +461,57 @@ export async function removeFeed(feedId: string): Promise<void> {
   });
 }
 
-export async function getUnreadArticles(): Promise<Article[]> {
-  const text = await request("/reader/api/0/stream/contents/user/-/state/com.google/reading-list", {
-    params: {
-      output: "json",
-      n: "50",
-      xt: "user/-/state/com.google/read",
-    },
-  });
+async function fetchArticleStream(
+  streamPath: string,
+  extraParams: Record<string, string>,
+  continuation?: string
+): Promise<ArticleFetchResult> {
+  const feeds = await getFeeds();
+  const iconMap = buildFeedIconMap(feeds);
+
+  const params: Record<string, string> = {
+    output: "json",
+    n: "50",
+    ...extraParams,
+  };
+
+  if (continuation) {
+    params["c"] = continuation;
+  }
+
+  const text = await request(`/reader/api/0/stream/contents/${streamPath}`, { params });
 
   const data: FreshRSSStreamContentsResponse = JSON.parse(text);
-  return (data.items || []).map(parseStreamItem);
+  const articles = (data.items || []).map((item: FreshRSSStreamItem) => parseStreamItem(item, iconMap));
+
+  return {
+    articles,
+    continuation: data.continuation,
+  };
 }
 
-export async function getReadArticles(): Promise<Article[]> {
-  const text = await request("/reader/api/0/stream/contents/user/-/state/com.google/reading-list", {
-    params: {
-      output: "json",
-      n: "50",
-      it: "user/-/state/com.google/read",
-    },
-  });
-
-  const data: FreshRSSStreamContentsResponse = JSON.parse(text);
-  return (data.items || []).map(parseStreamItem);
+export async function getUnreadArticles(continuation?: string): Promise<ArticleFetchResult> {
+  return fetchArticleStream(
+    "user/-/state/com.google/reading-list",
+    { xt: "user/-/state/com.google/read" },
+    continuation
+  );
 }
 
-export async function getStarredArticles(): Promise<Article[]> {
-  const text = await request("/reader/api/0/stream/contents/user/-/state/com.google/starred", {
-    params: {
-      output: "json",
-      n: "50",
-    },
-  });
+export async function getReadArticles(continuation?: string): Promise<ArticleFetchResult> {
+  return fetchArticleStream(
+    "user/-/state/com.google/reading-list",
+    { it: "user/-/state/com.google/read" },
+    continuation
+  );
+}
 
-  const data: FreshRSSStreamContentsResponse = JSON.parse(text);
-  return (data.items || []).map(parseStreamItem);
+export async function getStarredArticles(continuation?: string): Promise<ArticleFetchResult> {
+  return fetchArticleStream(
+    "user/-/state/com.google/starred",
+    {},
+    continuation
+  );
 }
 
 export async function markArticleRead(articleId: string): Promise<void> {

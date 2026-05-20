@@ -4,12 +4,13 @@ Browse and manage your FreshRSS feeds and articles directly from Raycast.
 
 ## Features
 
-- **List Feeds** — View all your subscribed RSS/Atom feeds
+- **List Feeds** — View all subscribed RSS/Atom feeds with icons
 - **Add Feed** — Subscribe to a new RSS/Atom feed by URL
 - **Remove Feed** — Unsubscribe from a feed with confirmation
-- **Unread Articles** — Browse unread articles with mark-as-read and star actions
-- **Read Articles** — Browse read articles with mark-as-unread and star actions
-- **Starred Articles** — Browse starred/favorite articles with unstar and read/unread actions
+- **Unread Articles** — Browse unread articles with pagination, mark-as-read, and star actions
+- **Read Articles** — Browse read articles with pagination, mark-as-unread, and star actions
+- **Starred Articles** — Browse starred/favorite articles with pagination, unstar, and read/unread actions
+- **Browse by Category** — Navigate articles by category/label folders
 
 ## Prerequisites
 
@@ -50,18 +51,20 @@ The API endpoint is constructed automatically as `{Base URL}/api/greader.php`.
 
 This extension uses the FreshRSS Google Reader-compatible API:
 
-| Operation         | Endpoint                                          | Method |
-|-------------------|---------------------------------------------------|--------|
-| Authentication    | `/accounts/ClientLogin`                           | POST   |
-| Write token       | `/reader/api/0/token`                              | GET    |
-| List feeds        | `/reader/api/0/subscription/list`                 | GET    |
-| Add feed          | `/reader/api/0/subscription/quickadd`              | POST   |
-| Remove feed       | `/reader/api/0/subscription/edit`                  | POST   |
-| Unread articles   | `/reader/api/0/stream/contents/user/-/state/com.google/reading-list` | GET |
-| Read articles     | `/reader/api/0/stream/contents/user/-/state/com.google/reading-list` | GET |
-| Starred articles  | `/reader/api/0/stream/contents/user/-/state/com.google/starred` | GET |
-| Mark read/unread  | `/reader/api/0/edit-tag`                           | POST   |
-| Star/unstar       | `/reader/api/0/edit-tag`                           | POST   |
+| Operation            | Endpoint                                                                           | Method |
+|----------------------|------------------------------------------------------------------------------------|--------|
+| Authentication       | `/accounts/ClientLogin`                                                           | POST   |
+| Write token          | `/reader/api/0/token`                                                               | GET    |
+| List feeds           | `/reader/api/0/subscription/list`                                                  | GET    |
+| Add feed             | `/reader/api/0/subscription/quickadd`                                               | POST   |
+| Remove feed          | `/reader/api/0/subscription/edit`                                                   | POST   |
+| List categories      | `/reader/api/0/tag/list`                                                            | GET    |
+| Unread articles      | `/reader/api/0/stream/contents/user/-/state/com.google/reading-list`                | GET    |
+| Read articles        | `/reader/api/0/stream/contents/user/-/state/com.google/reading-list`                 | GET    |
+| Starred articles     | `/reader/api/0/stream/contents/user/-/state/com.google/starred`                      | GET    |
+| Articles by category | `/reader/api/0/stream/contents/{categoryId}`                                        | GET    |
+| Mark read/unread     | `/reader/api/0/edit-tag`                                                            | POST   |
+| Star/unstar          | `/reader/api/0/edit-tag`                                                            | POST   |
 
 ## Running Locally
 
@@ -89,13 +92,27 @@ This extension uses the FreshRSS Google Reader-compatible API:
    npm run lint
    ```
 
-## Known Limitations
+## Features Detail
 
-- Fetches up to 50 articles per view (no pagination/continuation support yet)
-- Article content is truncated to 300 characters in summaries
-- Feed icons are not displayed
-- No background sync or local caching
-- Categories/folders are shown as metadata but not as a navigation structure
+### Pagination
+
+Article lists support pagination via the FreshRSS continuation token. Select "Load more articles..." at the bottom of any article list to fetch the next page.
+
+### Article Detail View
+
+Press `Cmd+Enter` on any article to see the full HTML content rendered in a Detail view, including metadata (feed name, author, published date, read/starred status).
+
+### Caching
+
+Feed lists and categories are cached for 5 minutes to reduce API calls. The cache is automatically invalidated when you add or remove a feed, and on explicit refresh.
+
+### Feed Icons
+
+Feed icons from the FreshRSS API are displayed next to feed titles when available.
+
+### Category Browsing
+
+The "Browse by Category" command shows all labels/folders from your FreshRSS account. Select a category to see its articles with full pagination and read/star support.
 
 ## License
 

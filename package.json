@@ -48,6 +48,12 @@
       "title": "Starred Articles",
       "description": "Browse starred/favorite articles",
       "mode": "view"
+    },
+    {
+      "name": "browse-categories",
+      "title": "Browse by Category",
+      "description": "Browse articles by category/label",
+      "mode": "view"
     }
   ],
   "preferences": [

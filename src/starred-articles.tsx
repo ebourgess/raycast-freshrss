@@ -8,12 +8,14 @@ import { FreshRSSAuthError, FreshRSSApiError } from "./api/freshrss";
 export default function StarredArticlesCommand() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [continuation, setContinuation] = useState<string | undefined>(undefined);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
       const result = await getStarredArticles();
-      setArticles(result);
+      setArticles(result.articles);
+      setContinuation(result.continuation);
     } catch (error: unknown) {
       const message =
         error instanceof FreshRSSAuthError || error instanceof FreshRSSApiError
@@ -30,5 +32,29 @@ export default function StarredArticlesCommand() {
     fetchData();
   }, [fetchData]);
 
-  return <ArticleList articles={articles} isLoading={isLoading} onRefresh={fetchData} mode="starred" />;
+  const loadMore = useCallback(async () => {
+    if (!continuation) return;
+    try {
+      const result = await getStarredArticles(continuation);
+      setArticles((prev) => [...prev, ...result.articles]);
+      setContinuation(result.continuation);
+    } catch (error: unknown) {
+      const message =
+        error instanceof FreshRSSAuthError || error instanceof FreshRSSApiError
+          ? error.message
+          : "Failed to load more articles.";
+      await showToast({ style: Toast.Style.Failure, title: "Error", message });
+    }
+  }, [continuation]);
+
+  return (
+    <ArticleList
+      articles={articles}
+      isLoading={isLoading}
+      onRefresh={fetchData}
+      onLoadMore={continuation ? loadMore : undefined}
+      hasMore={!!continuation}
+      mode="starred"
+    />
+  );
 }

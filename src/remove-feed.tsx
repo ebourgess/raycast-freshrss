@@ -12,7 +12,7 @@ export default function RemoveFeedCommand() {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const result = await getFeeds();
+      const result = await getFeeds(true);
       setFeeds(result);
     } catch (error: unknown) {
       const message =

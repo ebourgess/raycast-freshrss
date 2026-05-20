@@ -19,6 +19,7 @@ export type Article = {
   url: string;
   feedId?: string;
   feedTitle?: string;
+  feedIconUrl?: string;
   author?: string;
   publishedAt?: string;
   updatedAt?: string;
@@ -29,6 +30,18 @@ export type Article = {
 };
 
 export type ArticleListMode = "unread" | "read" | "starred";
+
+export type ArticleFetchResult = {
+  articles: Article[];
+  continuation?: string;
+};
+
+export type Category = {
+  id: string;
+  label: string;
+  type?: string;
+  unreadCount?: number;
+};
 
 // FreshRSS API response types
 
@@ -87,4 +100,15 @@ export type FreshRSSUnreadCountEntry = {
 export type FreshRSSUnreadCountResponse = {
   max: number;
   unreadcounts: FreshRSSUnreadCountEntry[];
+};
+
+export type FreshRSSTagListEntry = {
+  id: string;
+  type?: string;
+  label?: string;
+  unread_count?: number;
+};
+
+export type FreshRSSTagListResponse = {
+  tags: FreshRSSTagListEntry[];
 };

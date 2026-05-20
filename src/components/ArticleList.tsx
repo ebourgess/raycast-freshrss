@@ -1,5 +1,6 @@
-import { List, Action, ActionPanel, Icon, Color } from "@raycast/api";
-import { showToast, Toast } from "@raycast/api";
+import { useState } from "react";
+import { List, Action, ActionPanel, Icon, Color, Detail } from "@raycast/api";
+import { showToast, Toast, useNavigation } from "@raycast/api";
 import type { Article, ArticleListMode } from "../api/types";
 import {
   markArticleRead,
@@ -26,8 +27,14 @@ function formatDate(dateStr?: string): string {
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
+function stripHtml(html?: string): string {
+  if (!html) return "";
+  return html.replace(/<[^>]*>/g, "").trim();
+}
+
 type ArticleActionCallbacks = {
   onRefresh?: () => void;
+  onLoadMore?: () => Promise<void>;
 };
 
 async function handleToggleRead(article: Article, isRead: boolean, onDone?: () => void) {
@@ -70,14 +77,17 @@ type ArticleListProps = {
   articles: Article[];
   isLoading: boolean;
   onRefresh?: () => void;
+  onLoadMore?: () => Promise<void>;
+  hasMore?: boolean;
   mode: ArticleListMode;
 };
 
-export function ArticleList({ articles, isLoading, onRefresh, mode }: ArticleListProps) {
+export function ArticleList({ articles, isLoading, onRefresh, onLoadMore, hasMore, mode }: ArticleListProps) {
   const title = mode === "unread" ? "Unread Articles" : mode === "read" ? "Read Articles" : "Starred Articles";
 
   const callbacks: ArticleActionCallbacks = {
     onRefresh,
+    onLoadMore,
   };
 
   return (
@@ -95,9 +105,23 @@ export function ArticleList({ articles, isLoading, onRefresh, mode }: ArticleLis
           }
         />
       ) : (
-        articles.map((article) => (
-          <ArticleListItem key={article.id} article={article} mode={mode} callbacks={callbacks} />
-        ))
+        <>
+          {articles.map((article) => (
+            <ArticleListItem key={article.id} article={article} mode={mode} callbacks={callbacks} />
+          ))}
+          {hasMore && onLoadMore ? (
+            <List.Item
+              id="__load_more__"
+              title="Load more articles..."
+              icon={Icon.ArrowDown}
+              actions={
+                <ActionPanel>
+                  <Action title="Load More" onAction={onLoadMore} icon={Icon.ArrowDown} />
+                </ActionPanel>
+              }
+            />
+          ) : null}
+        </>
       )}
     </List>
   );
@@ -137,10 +161,17 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
       id={article.id}
       title={article.title || "Untitled"}
       subtitle={subtitle}
+      icon={article.feedIconUrl ? { source: article.feedIconUrl } : undefined}
       accessories={accessories}
       actions={
         <ActionPanel>
           {article.url ? <Action.OpenInBrowser url={article.url} title="Open Article in Browser" /> : null}
+          <Action.Push
+            title="View Article"
+            icon={Icon.Document}
+            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            target={<ArticleDetailView article={article} />}
+          />
           {article.url ? <Action.CopyToClipboard content={article.url} title="Copy Article URL" /> : null}
           {article.id ? <Action.CopyToClipboard content={article.id} title="Copy Article ID" /> : null}
           {mode === "unread" && !article.isRead ? (
@@ -177,6 +208,39 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
           {callbacks.onRefresh ? (
             <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={callbacks.onRefresh} shortcut={{ modifiers: ["cmd", "shift"], key: "r" }} />
           ) : null}
+          {callbacks.onLoadMore ? (
+            <Action title="Load More" icon={Icon.ArrowDown} onAction={callbacks.onLoadMore} shortcut={{ modifiers: ["cmd"], key: "l" }} />
+          ) : null}
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function ArticleDetailView({ article }: { article: Article }) {
+  const metadata = (
+    <Detail.Metadata>
+      {article.feedTitle ? <Detail.Metadata.Label title="Feed" text={article.feedTitle} /> : null}
+      {article.author ? <Detail.Metadata.Label title="Author" text={article.author} /> : null}
+      {article.publishedAt ? <Detail.Metadata.Label title="Published" text={new Date(article.publishedAt).toLocaleString()} /> : null}
+      {article.updatedAt ? <Detail.Metadata.Label title="Updated" text={new Date(article.updatedAt).toLocaleString()} /> : null}
+      {article.isRead !== undefined ? <Detail.Metadata.Label title="Status" text={article.isRead ? "Read" : "Unread"} /> : null}
+      {article.isStarred !== undefined ? <Detail.Metadata.Label title="Starred" text={article.isStarred ? "Yes" : "No"} /> : null}
+    </Detail.Metadata>
+  );
+
+  const contentBody = article.content || article.summary || "No content available.";
+  const markdown = `## ${article.title || "Untitled"}\n\n${contentBody}`;
+
+  return (
+    <Detail
+      navigationTitle={article.title || "Article"}
+      markdown={markdown}
+      metadata={metadata}
+      actions={
+        <ActionPanel>
+          {article.url ? <Action.OpenInBrowser url={article.url} title="Open in Browser" /> : null}
+          {article.url ? <Action.CopyToClipboard content={article.url} title="Copy URL" /> : null}
         </ActionPanel>
       }
     />
