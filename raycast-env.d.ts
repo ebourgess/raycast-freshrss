@@ -20,6 +20,8 @@ type ExtensionPreferences = {
 declare type Preferences = ExtensionPreferences
 
 declare namespace Preferences {
+  /** Preferences accessible in the `primary` command */
+  export type Primary = ExtensionPreferences & {}
   /** Preferences accessible in the `list-feeds` command */
   export type ListFeeds = ExtensionPreferences & {}
   /** Preferences accessible in the `add-feed` command */
@@ -37,6 +39,8 @@ declare namespace Preferences {
 }
 
 declare namespace Arguments {
+  /** Arguments passed to the `primary` command */
+  export type Primary = {}
   /** Arguments passed to the `list-feeds` command */
   export type ListFeeds = {}
   /** Arguments passed to the `add-feed` command */

@@ -14,6 +14,12 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "primary",
+      "title": "FreshRSS",
+      "description": "Browse FreshRSS feeds",
+      "mode": "view"
+    },
+    {
       "name": "list-feeds",
       "title": "List Feeds",
       "description": "List all subscribed feeds",
@@ -94,7 +100,9 @@
   },
   "scripts": {
     "build": "ray build",
+    "build:beta": "ray build --target x",
     "dev": "ray develop",
+    "dev:beta": "ray develop --target x",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
   }

@@ -421,8 +421,8 @@ export async function getArticlesByCategory(categoryId: string, continuation?: s
 }
 
 export async function addFeed(feedUrl: string): Promise<void> {
-  cache.delete(CACHE_KEYS.feeds);
-  cache.delete(CACHE_KEYS.feedsTTL);
+  cache.set(CACHE_KEYS.feeds, "");
+  cache.set(CACHE_KEYS.feedsTTL, "0");
 
   const text = await request("/reader/api/0/subscription/quickadd", {
     method: "POST",
@@ -447,8 +447,8 @@ export async function addFeed(feedUrl: string): Promise<void> {
 }
 
 export async function removeFeed(feedId: string): Promise<void> {
-  cache.delete(CACHE_KEYS.feeds);
-  cache.delete(CACHE_KEYS.feedsTTL);
+  cache.set(CACHE_KEYS.feeds, "");
+  cache.set(CACHE_KEYS.feedsTTL, "0");
 
   await request("/reader/api/0/subscription/edit", {
     method: "POST",

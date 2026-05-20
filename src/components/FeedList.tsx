@@ -32,11 +32,7 @@ export function FeedList({ feeds, isLoading, actions, emptyTitle, emptyDescripti
             id={feed.id}
             title={feed.title}
             subtitle={feed.url || feed.htmlUrl || ""}
-            icon={
-              feed.iconUrl
-                ? { source: feed.iconUrl as unknown as Image.Source, fallback: Icon.Rss }
-                : { value: Icon.Rss }
-            }
+            icon={feed.iconUrl ? { source: feed.iconUrl } : Icon.Rss}
             accessories={[{ text: feed.id }]}
             actions={
               <ActionPanel>
