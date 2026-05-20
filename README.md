@@ -1,0 +1,1 @@
+# Raycast FreshRSS extension
