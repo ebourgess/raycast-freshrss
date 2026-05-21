@@ -1,6 +1,5 @@
-import { useState } from "react";
 import { List, Action, ActionPanel, Icon, Color, Detail } from "@raycast/api";
-import { showToast, Toast, useNavigation } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import type { Article, ArticleListMode } from "../api/types";
 import {
   markArticleRead,
@@ -91,7 +90,7 @@ export function ArticleList({ articles, isLoading, onRefresh, onLoadMore, hasMor
   };
 
   return (
-    <List isLoading={isLoading} navigationTitle={title} searchBarPlaceholder="Search articles...">
+    <List isLoading={isLoading} navigationTitle={title} searchBarPlaceholder="Search articles..." isShowingDetail>
       {articles.length === 0 && !isLoading ? (
         <List.EmptyView
           title={mode === "unread" ? "No unread articles" : mode === "read" ? "No read articles" : "No starred articles"}
@@ -156,6 +155,20 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
 
   const subtitle = [article.feedTitle, article.author].filter(Boolean).join(" · ");
 
+  const contentBody = article.content || article.summary || "No content available.";
+  const previewMarkdown = `## ${article.title || "Untitled"}\n\n${contentBody}`;
+
+  const metadata = (
+    <List.Item.Detail.Metadata>
+      {article.feedTitle ? <List.Item.Detail.Metadata.Label title="Feed" text={article.feedTitle} /> : null}
+      {article.author ? <List.Item.Detail.Metadata.Label title="Author" text={article.author} /> : null}
+      {article.publishedAt ? <List.Item.Detail.Metadata.Label title="Published" text={new Date(article.publishedAt).toLocaleString()} /> : null}
+      {article.updatedAt ? <List.Item.Detail.Metadata.Label title="Updated" text={new Date(article.updatedAt).toLocaleString()} /> : null}
+      {article.isRead !== undefined ? <List.Item.Detail.Metadata.Label title="Status" text={article.isRead ? "Read" : "Unread"} /> : null}
+      {article.isStarred !== undefined ? <List.Item.Detail.Metadata.Label title="Starred" text={article.isStarred ? "Yes" : "No"} /> : null}
+    </List.Item.Detail.Metadata>
+  );
+
   return (
     <List.Item
       id={article.id}
@@ -163,6 +176,12 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
       subtitle={subtitle}
       icon={article.feedIconUrl ? { source: article.feedIconUrl } : undefined}
       accessories={accessories}
+      detail={
+        <List.Item.Detail
+          markdown={previewMarkdown}
+          metadata={metadata}
+        />
+      }
       actions={
         <ActionPanel>
           {article.url ? <Action.OpenInBrowser url={article.url} title="Open Article in Browser" /> : null}
