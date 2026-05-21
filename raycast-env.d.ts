@@ -38,6 +38,10 @@ declare namespace Preferences {
   export type StarredArticles = ExtensionPreferences & {}
   /** Preferences accessible in the `browse-categories` command */
   export type BrowseCategories = ExtensionPreferences & {}
+  /** Preferences accessible in the `search-articles` command */
+  export type SearchArticles = ExtensionPreferences & {}
+  /** Preferences accessible in the `refresh-feeds` command */
+  export type RefreshFeeds = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -57,5 +61,9 @@ declare namespace Arguments {
   export type StarredArticles = {}
   /** Arguments passed to the `browse-categories` command */
   export type BrowseCategories = {}
+  /** Arguments passed to the `search-articles` command */
+  export type SearchArticles = {}
+  /** Arguments passed to the `refresh-feeds` command */
+  export type RefreshFeeds = {}
 }
 
