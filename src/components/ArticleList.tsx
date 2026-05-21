@@ -212,15 +212,33 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
       }
       actions={
         <ActionPanel>
-          {article.url ? <Action.OpenInBrowser url={article.url} title="Open Article in Browser" /> : null}
+          {article.url ? (
+            <Action.OpenInBrowser
+              url={article.url}
+              title="Open Article in Browser"
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+            />
+          ) : null}
           <Action.Push
             title="View Article"
             icon={Icon.Document}
             shortcut={{ modifiers: ["cmd"], key: "enter" }}
             target={<ArticleDetailView article={article} />}
           />
-          {article.url ? <Action.CopyToClipboard content={article.url} title="Copy Article URL" /> : null}
-          {article.id ? <Action.CopyToClipboard content={article.id} title="Copy Article ID" /> : null}
+          {article.url ? (
+            <Action.CopyToClipboard
+              content={article.url}
+              title="Copy Article URL"
+              shortcut={{ modifiers: ["cmd"], key: "c" }}
+            />
+          ) : null}
+          {article.id ? (
+            <Action.CopyToClipboard
+              content={article.id}
+              title="Copy Article ID"
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            />
+          ) : null}
           {article.url ? (
             <Action
               title="Save to Readwise Reader"
@@ -302,8 +320,20 @@ function ArticleDetailView({ article }: { article: Article }) {
       metadata={metadata}
       actions={
         <ActionPanel>
-          {article.url ? <Action.OpenInBrowser url={article.url} title="Open in Browser" /> : null}
-          {article.url ? <Action.CopyToClipboard content={article.url} title="Copy URL" /> : null}
+          {article.url ? (
+            <Action.OpenInBrowser
+              url={article.url}
+              title="Open in Browser"
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+            />
+          ) : null}
+          {article.url ? (
+            <Action.CopyToClipboard
+              content={article.url}
+              title="Copy URL"
+              shortcut={{ modifiers: ["cmd"], key: "c" }}
+            />
+          ) : null}
           {article.url ? (
             <Action
               title="Save to Readwise Reader"
