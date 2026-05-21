@@ -1,2 +1,7 @@
 node_modules
 .DS_Store
+docs
+dist
+*.raycast
+.env
+.env.local
