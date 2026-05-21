@@ -87,6 +87,14 @@
       "type": "password",
       "required": true,
       "placeholder": "Enter your API password"
+    },
+    {
+      "name": "readwiseToken",
+      "title": "Readwise Token",
+      "description": "Your Readwise access token for saving articles to Reader (optional). Get yours at readwise.io/access_token",
+      "type": "password",
+      "required": false,
+      "placeholder": "Enter your Readwise access token"
     }
   ],
   "dependencies": {

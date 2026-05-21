@@ -13,7 +13,9 @@ type ExtensionPreferences = {
   /** Username - Your FreshRSS username */
   "username": string,
   /** API Password - Your FreshRSS API password (not your login password) */
-  "apiPassword": string
+  "apiPassword": string,
+  /** Readwise Token - Your Readwise access token for saving articles to Reader (optional). Get yours at readwise.io/access_token */
+  "readwiseToken"?: string
 }
 
 /** Preferences accessible in all the extension's commands */

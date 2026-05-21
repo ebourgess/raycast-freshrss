@@ -1,5 +1,5 @@
 import { List, Action, ActionPanel, Icon, Color, Detail } from "@raycast/api";
-import { showToast, Toast } from "@raycast/api";
+import { showToast, Toast, openCommandPreferences, open } from "@raycast/api";
 import type { Article, ArticleListMode } from "../api/types";
 import {
   markArticleRead,
@@ -9,6 +9,7 @@ import {
   FreshRSSAuthError,
   FreshRSSApiError,
 } from "../api/freshrss";
+import { saveToReadwise, hasReadwiseToken, ReadwiseError } from "../api/readwise";
 
 function formatDate(dateStr?: string): string {
   if (!dateStr) return "";
@@ -70,6 +71,33 @@ async function handleToggleStar(article: Article, isStarred: boolean, onDone?: (
     const message = error instanceof FreshRSSAuthError || error instanceof FreshRSSApiError ? error.message : "Failed to update article state";
     await showToast({ style: Toast.Style.Failure, title: "Error", message });
   }
+}
+
+async function handleSaveToReadwise(article: Article) {
+  if (!article.url) {
+    await showToast({ style: Toast.Style.Failure, title: "Error", message: "This article has no URL" });
+    return;
+  }
+  if (!hasReadwiseToken()) {
+    await openCommandPreferences();
+    return;
+  }
+  try {
+    await saveToReadwise({
+      url: article.url,
+      title: article.title,
+      author: article.author,
+      summary: article.summary,
+    });
+    await showToast({ style: Toast.Style.Success, title: "Saved to Readwise Reader" });
+  } catch (error: unknown) {
+    const message = error instanceof ReadwiseError ? error.message : "Failed to save to Readwise Reader";
+    await showToast({ style: Toast.Style.Failure, title: "Error", message });
+  }
+}
+
+async function handleOpenInReadwise() {
+  await open("https://readwise.io/reader");
 }
 
 type ArticleListProps = {
@@ -193,6 +221,22 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
           />
           {article.url ? <Action.CopyToClipboard content={article.url} title="Copy Article URL" /> : null}
           {article.id ? <Action.CopyToClipboard content={article.id} title="Copy Article ID" /> : null}
+          {article.url ? (
+            <Action
+              title="Save to Readwise Reader"
+              icon={Icon.Bookmark}
+              onAction={() => handleSaveToReadwise(article)}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+            />
+          ) : null}
+          {article.url ? (
+            <Action
+              title="Open Readwise Reader"
+              icon={Icon.ArrowRight}
+              onAction={handleOpenInReadwise}
+              shortcut={{ modifiers: ["ctrl", "shift"], key: "w" }}
+            />
+          ) : null}
           {mode === "unread" && !article.isRead ? (
             <Action
               title="Mark as Read"
@@ -260,6 +304,22 @@ function ArticleDetailView({ article }: { article: Article }) {
         <ActionPanel>
           {article.url ? <Action.OpenInBrowser url={article.url} title="Open in Browser" /> : null}
           {article.url ? <Action.CopyToClipboard content={article.url} title="Copy URL" /> : null}
+          {article.url ? (
+            <Action
+              title="Save to Readwise Reader"
+              icon={Icon.Bookmark}
+              onAction={() => handleSaveToReadwise(article)}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+            />
+          ) : null}
+          {article.url ? (
+            <Action
+              title="Open Readwise Reader"
+              icon={Icon.ArrowRight}
+              onAction={handleOpenInReadwise}
+              shortcut={{ modifiers: ["ctrl", "shift"], key: "w" }}
+            />
+          ) : null}
         </ActionPanel>
       }
     />
