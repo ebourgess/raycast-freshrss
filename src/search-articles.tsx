@@ -15,6 +15,7 @@ export default function SearchArticlesCommand() {
     if (!query.trim()) {
       setArticles([]);
       setContinuation(undefined);
+      setIsLoading(false);
       return;
     }
     setIsLoading(true);
@@ -39,7 +40,7 @@ export default function SearchArticlesCommand() {
       performSearch(searchText);
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchText, performSearch]);
+  }, [searchText]);
 
   const loadMore = useCallback(async () => {
     if (!continuation || !searchText.trim()) return;
