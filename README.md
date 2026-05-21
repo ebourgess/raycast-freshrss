@@ -5,12 +5,17 @@ Browse and manage your FreshRSS feeds and articles directly from Raycast.
 ## Features
 
 - **List Feeds** — View all subscribed RSS/Atom feeds with icons
-- **Add Feed** — Subscribe to a new RSS/Atom feed by URL
+- **Add Feed** — Subscribe to a new RSS/Atom feed by URL, optionally assign to a category
 - **Remove Feed** — Unsubscribe from a feed with confirmation
 - **Unread Articles** — Browse unread articles with pagination, mark-as-read, and star actions
 - **Read Articles** — Browse read articles with pagination, mark-as-unread, and star actions
 - **Starred Articles** — Browse starred/favorite articles with pagination, unstar, and read/unread actions
 - **Browse by Category** — Navigate articles by category/label folders
+- **Search Articles** — Full-text search across all feeds with debounced input and pagination
+- **Refresh Feeds** — Force refresh all feeds and clear the local cache
+- **Side-by-side Preview** — Read article content next to the list as you navigate
+- **Readwise Reader Integration** — Save articles to Readwise Reader with one action
+- **Keyboard Shortcuts** — Every action has a keyboard shortcut
 
 ## Prerequisites
 
@@ -44,6 +49,7 @@ Configure the extension in Raycast Preferences:
 | Base URL    | Your FreshRSS instance URL (without `/api/`)    | `https://feed.ebourgess.dev`   |
 | Username    | Your FreshRSS username                           | `alice`                        |
 | API Password| Your FreshRSS **API password** (not your login)  | *(your API password)*          |
+| Readwise Token | Your Readwise access token (optional)        | *(from readwise.io/access_token)* |
 
 The API endpoint is constructed automatically as `{Base URL}/api/greader.php`.
 
@@ -57,8 +63,10 @@ This extension uses the FreshRSS Google Reader-compatible API:
 | Write token          | `/reader/api/0/token`                                                               | GET    |
 | List feeds           | `/reader/api/0/subscription/list`                                                  | GET    |
 | Add feed             | `/reader/api/0/subscription/quickadd`                                               | POST   |
+| Add feed with category | `/reader/api/0/subscription/edit`                                                | POST   |
 | Remove feed          | `/reader/api/0/subscription/edit`                                                   | POST   |
 | List categories      | `/reader/api/0/tag/list`                                                            | GET    |
+| Search articles      | `/reader/api/0/search/items`                                                        | GET    |
 | Unread articles      | `/reader/api/0/stream/contents/user/-/state/com.google/reading-list`                | GET    |
 | Read articles        | `/reader/api/0/stream/contents/user/-/state/com.google/reading-list`                 | GET    |
 | Starred articles     | `/reader/api/0/stream/contents/user/-/state/com.google/starred`                      | GET    |
@@ -66,41 +74,64 @@ This extension uses the FreshRSS Google Reader-compatible API:
 | Mark read/unread     | `/reader/api/0/edit-tag`                                                            | POST   |
 | Star/unstar          | `/reader/api/0/edit-tag`                                                            | POST   |
 
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Cmd+Enter` | View article (push to full detail) |
+| `Cmd+O` | Open in browser |
+| `Cmd+C` | Copy article URL |
+| `Cmd+Shift+C` | Copy article ID |
+| `Cmd+R` | Mark as read |
+| `Cmd+U` | Mark as unread |
+| `Cmd+S` | Star article |
+| `Cmd+Shift+S` | Unstar article |
+| `Cmd+Shift+W` | Save to Readwise Reader |
+| `Ctrl+Shift+W` | Open Readwise Reader |
+| `Cmd+Shift+R` | Refresh |
+| `Cmd+L` | Load more articles |
+
+Shortcuts work in both the list view and the pushed detail view.
+
 ## Running Locally
 
 1. Install dependencies:
 
-   ```bash
-   npm install
-   ```
+    ```bash
+    npm install
+    ```
 
 2. Build the extension:
 
-   ```bash
-   npm run build
-   ```
+    ```bash
+    npm run build
+    ```
 
 3. Develop with live reload:
 
-   ```bash
-   npm run dev
-   ```
+    ```bash
+    npm run dev
+    ```
 
 4. Lint:
 
-   ```bash
-   npm run lint
-   ```
+    ```bash
+    npm run lint
+    ```
 
 ## Features Detail
+
+### Side-by-side Preview
+
+Article lists use Raycast's `isShowingDetail` mode to show article content next to the list as you navigate. Press `Cmd+Enter` to push to a full-screen detail view for complete article reading.
 
 ### Pagination
 
 Article lists support pagination via the FreshRSS continuation token. Select "Load more articles..." at the bottom of any article list to fetch the next page.
 
-### Article Detail View
+### Search
 
-Press `Cmd+Enter` on any article to see the full HTML content rendered in a Detail view, including metadata (feed name, author, published date, read/starred status).
+The "Search Articles" command provides full-text search across all feeds with a 300ms debounce to avoid excessive API calls. Results render through the same `ArticleList` component, so you get the side-by-side preview, keyboard shortcuts, and all article actions automatically.
 
 ### Caching
 
@@ -113,6 +144,16 @@ Feed icons from the FreshRSS API are displayed next to feed titles when availabl
 ### Category Browsing
 
 The "Browse by Category" command shows all labels/folders from your FreshRSS account. Select a category to see its articles with full pagination and read/star support.
+
+### Readwise Reader Integration
+
+Set your Readwise access token in Raycast Preferences to enable the "Save to Readwise Reader" action. Articles are saved via the Readwise API (`POST https://readwise.io/api/v3/save/`) with the article URL, title, author, and summary.
+
+### Feed Management
+
+- **Add Feed** — Form with URL validation and a category dropdown populated from your FreshRSS labels
+- **Remove Feed** — Destructive action with confirmation dialog
+- **Refresh Feeds** — `no-view` command that clears the cache and re-fetches all feeds
 
 ## License
 
