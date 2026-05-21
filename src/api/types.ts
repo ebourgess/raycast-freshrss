@@ -112,3 +112,10 @@ export type FreshRSSTagListEntry = {
 export type FreshRSSTagListResponse = {
   tags: FreshRSSTagListEntry[];
 };
+
+export type FreshRSSSearchItemsResponse = {
+  id: string;
+  updated: number;
+  continuation?: string;
+  items: FreshRSSStreamItem[];
+};

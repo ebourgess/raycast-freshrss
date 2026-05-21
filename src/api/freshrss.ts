@@ -12,6 +12,7 @@ import type {
   FreshRSSStreamContentsResponse,
   FreshRSSStreamItem,
   FreshRSSTagListResponse,
+  FreshRSSSearchItemsResponse,
 } from "./types";
 
 let cachedAuthToken: string | null = null;
@@ -512,6 +513,31 @@ export async function getStarredArticles(continuation?: string): Promise<Article
     {},
     continuation
   );
+}
+
+export async function searchArticles(query: string, continuation?: string): Promise<ArticleFetchResult> {
+  const feeds = await getFeeds();
+  const iconMap = buildFeedIconMap(feeds);
+
+  const params: Record<string, string> = {
+    output: "json",
+    n: "50",
+    q: query,
+  };
+
+  if (continuation) {
+    params["c"] = continuation;
+  }
+
+  const text = await request("/reader/api/0/search/items", { params });
+
+  const data: FreshRSSSearchItemsResponse = JSON.parse(text);
+  const articles = (data.items || []).map((item: FreshRSSStreamItem) => parseStreamItem(item, iconMap));
+
+  return {
+    articles,
+    continuation: data.continuation,
+  };
 }
 
 export async function markArticleRead(articleId: string): Promise<void> {
