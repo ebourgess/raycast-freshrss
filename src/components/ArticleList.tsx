@@ -223,7 +223,7 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
             title="View Article"
             icon={Icon.Document}
             shortcut={{ modifiers: ["cmd"], key: "enter" }}
-            target={<ArticleDetailView article={article} />}
+            target={<ArticleDetailView article={article} callbacks={callbacks} />}
           />
           {article.url ? (
             <Action.CopyToClipboard
@@ -298,7 +298,7 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
   );
 }
 
-function ArticleDetailView({ article }: { article: Article }) {
+function ArticleDetailView({ article, callbacks }: { article: Article; callbacks: ArticleActionCallbacks }) {
   const metadata = (
     <Detail.Metadata>
       {article.feedTitle ? <Detail.Metadata.Label title="Feed" text={article.feedTitle} /> : null}
@@ -349,6 +349,40 @@ function ArticleDetailView({ article }: { article: Article }) {
               onAction={handleOpenInReadwise}
               shortcut={{ modifiers: ["ctrl", "shift"], key: "w" }}
             />
+          ) : null}
+          {article.isRead !== undefined && !article.isRead ? (
+            <Action
+              title="Mark as Read"
+              icon={Icon.Circle}
+              onAction={() => handleToggleRead(article, false, callbacks.onRefresh)}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+            />
+          ) : null}
+          {article.isRead ? (
+            <Action
+              title="Mark as Unread"
+              icon={Icon.Circle}
+              onAction={() => handleToggleRead(article, true, callbacks.onRefresh)}
+              shortcut={{ modifiers: ["cmd"], key: "u" }}
+            />
+          ) : null}
+          {article.isStarred ? (
+            <Action
+              title="Unstar Article"
+              icon={Icon.Star}
+              onAction={() => handleToggleStar(article, true, callbacks.onRefresh)}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+            />
+          ) : (
+            <Action
+              title="Star Article"
+              icon={Icon.Star}
+              onAction={() => handleToggleStar(article, false, callbacks.onRefresh)}
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
+            />
+          )}
+          {callbacks.onRefresh ? (
+            <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={callbacks.onRefresh} shortcut={{ modifiers: ["cmd", "shift"], key: "r" }} />
           ) : null}
         </ActionPanel>
       }
