@@ -421,29 +421,42 @@ export async function getArticlesByCategory(categoryId: string, continuation?: s
   };
 }
 
-export async function addFeed(feedUrl: string): Promise<void> {
+export async function addFeed(feedUrl: string, category?: string): Promise<void> {
   cache.set(CACHE_KEYS.feeds, "");
   cache.set(CACHE_KEYS.feedsTTL, "0");
 
-  const text = await request("/reader/api/0/subscription/quickadd", {
-    method: "POST",
-    requireAuth: true,
-    requireWriteToken: false,
-    body: new URLSearchParams({ quickadd: feedUrl }).toString(),
-  });
+  if (category) {
+    await request("/reader/api/0/subscription/edit", {
+      method: "POST",
+      requireAuth: true,
+      requireWriteToken: true,
+      params: {
+        ac: "subscribe",
+        s: feedUrl,
+        a: `user/-/label/${category}`,
+      },
+    });
+  } else {
+    const text = await request("/reader/api/0/subscription/quickadd", {
+      method: "POST",
+      requireAuth: true,
+      requireWriteToken: false,
+      body: new URLSearchParams({ quickadd: feedUrl }).toString(),
+    });
 
-  let result: FreshRSSQuickAddResponse;
-  try {
-    result = JSON.parse(text);
-  } catch {
-    throw new FreshRSSApiError("Unexpected response when adding feed. The feed URL may be invalid.", 0);
-  }
+    let result: FreshRSSQuickAddResponse;
+    try {
+      result = JSON.parse(text);
+    } catch {
+      throw new FreshRSSApiError("Unexpected response when adding feed. The feed URL may be invalid.", 0);
+    }
 
-  if (result.numResults === 0) {
-    throw new FreshRSSApiError(
-      result.error || "Failed to add feed. The URL may not be a valid RSS/Atom feed, or it may already be subscribed.",
-      0
-    );
+    if (result.numResults === 0) {
+      throw new FreshRSSApiError(
+        result.error || "Failed to add feed. The URL may not be a valid RSS/Atom feed, or it may already be subscribed.",
+        0
+      );
+    }
   }
 }
 
