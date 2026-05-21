@@ -462,6 +462,15 @@ export async function removeFeed(feedId: string): Promise<void> {
   });
 }
 
+export async function refreshFeeds(): Promise<void> {
+  cache.set(CACHE_KEYS.feeds, "");
+  cache.set(CACHE_KEYS.feedsTTL, "0");
+  cache.set(CACHE_KEYS.categories, "");
+  cache.set(CACHE_KEYS.categoriesTTL, "0");
+
+  await getFeeds(true);
+}
+
 async function fetchArticleStream(
   streamPath: string,
   extraParams: Record<string, string>,
