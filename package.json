@@ -60,6 +60,12 @@
       "title": "Browse by Category",
       "description": "Browse articles by category/label",
       "mode": "view"
+    },
+    {
+      "name": "search-articles",
+      "title": "Search Articles",
+      "description": "Search articles across all feeds",
+      "mode": "view"
     }
   ],
   "preferences": [
