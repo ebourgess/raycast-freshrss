@@ -46,7 +46,7 @@ Configure the extension in Raycast Preferences:
 
 | Preference   | Description                                      | Example                        |
 |-------------|--------------------------------------------------|--------------------------------|
-| Base URL    | Your FreshRSS instance URL (without `/api/`)    | `https://feed.ebourgess.dev`   |
+| Base URL    | Your FreshRSS instance URL (without `/api/`)    | `https://your-freshrss-instance`   |
 | Username    | Your FreshRSS username                           | `alice`                        |
 | API Password| Your FreshRSS **API password** (not your login)  | *(your API password)*          |
 | Readwise Token | Your Readwise access token (optional)        | *(from readwise.io/access_token)* |
