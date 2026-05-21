@@ -66,6 +66,12 @@
       "title": "Search Articles",
       "description": "Search articles across all feeds",
       "mode": "view"
+    },
+    {
+      "name": "refresh-feeds",
+      "title": "Refresh Feeds",
+      "description": "Force refresh all feeds and clear cache",
+      "mode": "no-view"
     }
   ],
   "preferences": [
