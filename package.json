@@ -107,6 +107,15 @@
       "type": "password",
       "required": false,
       "placeholder": "Enter your Readwise access token"
+    },
+    {
+      "name": "autoMarkAsRead",
+      "title": "Auto Mark as Read",
+      "description": "Automatically mark articles as read when you open them",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Auto Mark as Read"
     }
   ],
   "dependencies": {

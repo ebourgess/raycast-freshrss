@@ -47,6 +47,14 @@ export default function ReadArticlesCommand() {
     }
   }, [continuation]);
 
+  const handleToggleRead = useCallback((articleId: string, isRead: boolean) => {
+    setArticles((prev) => prev.map((a) => (a.id === articleId ? { ...a, isRead } : a)));
+  }, []);
+
+  const handleToggleStar = useCallback((articleId: string, isStarred: boolean) => {
+    setArticles((prev) => prev.map((a) => (a.id === articleId ? { ...a, isStarred } : a)));
+  }, []);
+
   return (
     <ArticleList
       articles={articles}
@@ -55,6 +63,8 @@ export default function ReadArticlesCommand() {
       onLoadMore={continuation ? loadMore : undefined}
       hasMore={!!continuation}
       mode="read"
+      onToggleRead={handleToggleRead}
+      onToggleStar={handleToggleStar}
     />
   );
 }

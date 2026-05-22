@@ -15,7 +15,9 @@ type ExtensionPreferences = {
   /** API Password - Your FreshRSS API password (not your login password) */
   "apiPassword": string,
   /** Readwise Token - Your Readwise access token for saving articles to Reader (optional). Get yours at readwise.io/access_token */
-  "readwiseToken"?: string
+  "readwiseToken"?: string,
+  /** Auto Mark as Read - Automatically mark articles as read when you open them */
+  "autoMarkAsRead": boolean
 }
 
 /** Preferences accessible in all the extension's commands */

@@ -1,6 +1,7 @@
-import { List, Action, ActionPanel, Icon, Color, Detail } from "@raycast/api";
+import { useState, useEffect, useCallback } from "react";
+import { List, Action, ActionPanel, Icon, Color, Detail, getPreferenceValues } from "@raycast/api";
 import { showToast, Toast, openCommandPreferences, open } from "@raycast/api";
-import type { Article, ArticleListMode } from "../api/types";
+import type { Article, ArticleListMode, FreshRSSPreferences } from "../api/types";
 import {
   markArticleRead,
   markArticleUnread,
@@ -35,6 +36,9 @@ function stripHtml(html?: string): string {
 type ArticleActionCallbacks = {
   onRefresh?: () => void;
   onLoadMore?: () => Promise<void>;
+  onToggleRead?: (articleId: string, isRead: boolean) => void;
+  onToggleStar?: (articleId: string, isStarred: boolean) => void;
+  onMarkAllAsRead?: () => Promise<void>;
 };
 
 async function handleToggleRead(article: Article, isRead: boolean, onDone?: () => void) {
@@ -107,15 +111,21 @@ type ArticleListProps = {
   onLoadMore?: () => Promise<void>;
   hasMore?: boolean;
   mode: ArticleListMode;
+  onToggleRead?: (articleId: string, isRead: boolean) => void;
+  onToggleStar?: (articleId: string, isStarred: boolean) => void;
+  onMarkAllAsRead?: () => Promise<void>;
 };
 
-export function ArticleList({ articles, isLoading, onRefresh, onLoadMore, hasMore, mode }: ArticleListProps) {
-  const modeLabel = mode === "unread" ? "Unread Articles" : mode === "read" ? "Read Articles" : "Starred Articles";
+export function ArticleList({ articles, isLoading, onRefresh, onLoadMore, hasMore, mode, onToggleRead, onToggleStar, onMarkAllAsRead }: ArticleListProps) {
+  const modeLabel = mode === "unread" ? "Unread Articles" : mode === "read" ? "Read Articles" : mode === "starred" ? "Starred Articles" : "Articles";
   const title = `${modeLabel} (${articles.length})` as const;
 
   const callbacks: ArticleActionCallbacks = {
     onRefresh,
     onLoadMore,
+    onToggleRead: onToggleRead || ((_id: string, _isRead: boolean) => { onRefresh?.(); }),
+    onToggleStar: onToggleStar || ((_id: string, _isStarred: boolean) => { onRefresh?.(); }),
+    onMarkAllAsRead,
   };
 
   return (
@@ -256,19 +266,19 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
               shortcut={{ modifiers: ["ctrl", "shift"], key: "w" }}
             />
           ) : null}
-          {mode === "unread" && !article.isRead ? (
+          {mode !== "starred" && !article.isRead ? (
             <Action
               title="Mark as Read"
               icon={Icon.Circle}
-              onAction={() => handleToggleRead(article, false, callbacks.onRefresh)}
+              onAction={() => handleToggleRead(article, false, () => callbacks.onToggleRead?.(article.id, true))}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
             />
           ) : null}
-          {mode === "read" && article.isRead ? (
+          {mode !== "starred" && article.isRead ? (
             <Action
               title="Mark as Unread"
               icon={Icon.Circle}
-              onAction={() => handleToggleRead(article, true, callbacks.onRefresh)}
+              onAction={() => handleToggleRead(article, true, () => callbacks.onToggleRead?.(article.id, false))}
               shortcut={{ modifiers: ["cmd"], key: "u" }}
             />
           ) : null}
@@ -276,17 +286,25 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
             <Action
               title="Unstar Article"
               icon={Icon.Star}
-              onAction={() => handleToggleStar(article, true, callbacks.onRefresh)}
+              onAction={() => handleToggleStar(article, true, () => callbacks.onToggleStar?.(article.id, false))}
               shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
             />
           ) : (
             <Action
               title="Star Article"
               icon={Icon.Star}
-              onAction={() => handleToggleStar(article, false, callbacks.onRefresh)}
+              onAction={() => handleToggleStar(article, false, () => callbacks.onToggleStar?.(article.id, true))}
               shortcut={{ modifiers: ["cmd"], key: "s" }}
             />
           )}
+          {mode === "unread" && callbacks.onMarkAllAsRead ? (
+            <Action
+              title="Mark All as Read"
+              icon={Icon.Checkmark}
+              onAction={callbacks.onMarkAllAsRead}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+            />
+          ) : null}
           {callbacks.onRefresh ? (
             <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={callbacks.onRefresh} shortcut={{ modifiers: ["cmd", "shift"], key: "r" }} />
           ) : null}
@@ -300,6 +318,16 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
 }
 
 function ArticleDetailView({ article, callbacks }: { article: Article; callbacks: ArticleActionCallbacks }) {
+  const { autoMarkAsRead } = getPreferenceValues<FreshRSSPreferences>();
+
+  useEffect(() => {
+    if (autoMarkAsRead && !article.isRead) {
+      markArticleRead(article.id).then(() => {
+        callbacks.onToggleRead?.(article.id, true);
+      }).catch(() => {});
+    }
+  }, []);
+
   const metadata = (
     <Detail.Metadata>
       {article.feedTitle ? <Detail.Metadata.Label title="Feed" text={article.feedTitle} /> : null}
@@ -355,7 +383,7 @@ function ArticleDetailView({ article, callbacks }: { article: Article; callbacks
             <Action
               title="Mark as Read"
               icon={Icon.Circle}
-              onAction={() => handleToggleRead(article, false, callbacks.onRefresh)}
+              onAction={() => handleToggleRead(article, false, () => callbacks.onToggleRead?.(article.id, true))}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
             />
           ) : null}
@@ -363,7 +391,7 @@ function ArticleDetailView({ article, callbacks }: { article: Article; callbacks
             <Action
               title="Mark as Unread"
               icon={Icon.Circle}
-              onAction={() => handleToggleRead(article, true, callbacks.onRefresh)}
+              onAction={() => handleToggleRead(article, true, () => callbacks.onToggleRead?.(article.id, false))}
               shortcut={{ modifiers: ["cmd"], key: "u" }}
             />
           ) : null}
@@ -371,14 +399,14 @@ function ArticleDetailView({ article, callbacks }: { article: Article; callbacks
             <Action
               title="Unstar Article"
               icon={Icon.Star}
-              onAction={() => handleToggleStar(article, true, callbacks.onRefresh)}
+              onAction={() => handleToggleStar(article, true, () => callbacks.onToggleStar?.(article.id, false))}
               shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
             />
           ) : (
             <Action
               title="Star Article"
               icon={Icon.Star}
-              onAction={() => handleToggleStar(article, false, callbacks.onRefresh)}
+              onAction={() => handleToggleStar(article, false, () => callbacks.onToggleStar?.(article.id, true))}
               shortcut={{ modifiers: ["cmd"], key: "s" }}
             />
           )}

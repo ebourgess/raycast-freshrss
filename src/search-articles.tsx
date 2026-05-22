@@ -57,6 +57,14 @@ export default function SearchArticlesCommand() {
     }
   }, [continuation, searchText]);
 
+  const handleToggleRead = useCallback((articleId: string, isRead: boolean) => {
+    setArticles((prev) => prev.map((a) => (a.id === articleId ? { ...a, isRead } : a)));
+  }, []);
+
+  const handleToggleStar = useCallback((articleId: string, isStarred: boolean) => {
+    setArticles((prev) => prev.map((a) => (a.id === articleId ? { ...a, isStarred } : a)));
+  }, []);
+
   if (articles.length > 0 || isLoading) {
     return (
       <ArticleList
@@ -65,7 +73,9 @@ export default function SearchArticlesCommand() {
         onRefresh={() => performSearch(searchText)}
         onLoadMore={continuation ? loadMore : undefined}
         hasMore={!!continuation}
-        mode="unread"
+        mode="mixed"
+        onToggleRead={handleToggleRead}
+        onToggleStar={handleToggleStar}
       />
     );
   }

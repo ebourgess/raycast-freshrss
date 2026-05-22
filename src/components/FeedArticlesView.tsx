@@ -1,11 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
-import { getStarredArticles } from "./api/freshrss";
-import { ArticleList } from "./components/ArticleList";
-import type { Article } from "./api/types";
 import { showToast, Toast } from "@raycast/api";
-import { FreshRSSAuthError, FreshRSSApiError } from "./api/freshrss";
+import { getArticlesByFeed } from "../api/freshrss";
+import { ArticleList } from "./ArticleList";
+import type { Article } from "../api/types";
+import { FreshRSSAuthError, FreshRSSApiError } from "../api/freshrss";
 
-export default function StarredArticlesCommand() {
+type FeedArticlesViewProps = {
+  feedId: string;
+  feedTitle?: string;
+};
+
+export function FeedArticlesView({ feedId, feedTitle }: FeedArticlesViewProps) {
   const [articles, setArticles] = useState<Article[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [continuation, setContinuation] = useState<string | undefined>(undefined);
@@ -13,20 +18,20 @@ export default function StarredArticlesCommand() {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const result = await getStarredArticles();
+      const result = await getArticlesByFeed(feedId);
       setArticles(result.articles);
       setContinuation(result.continuation);
     } catch (error: unknown) {
       const message =
         error instanceof FreshRSSAuthError || error instanceof FreshRSSApiError
           ? error.message
-          : "Failed to load starred articles. Check your FreshRSS connection.";
+          : "Failed to load articles for this feed.";
       await showToast({ style: Toast.Style.Failure, title: "Error", message });
       setArticles([]);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [feedId]);
 
   useEffect(() => {
     fetchData();
@@ -35,7 +40,7 @@ export default function StarredArticlesCommand() {
   const loadMore = useCallback(async () => {
     if (!continuation) return;
     try {
-      const result = await getStarredArticles(continuation);
+      const result = await getArticlesByFeed(feedId, continuation);
       setArticles((prev) => [...prev, ...result.articles]);
       setContinuation(result.continuation);
     } catch (error: unknown) {
@@ -45,7 +50,7 @@ export default function StarredArticlesCommand() {
           : "Failed to load more articles.";
       await showToast({ style: Toast.Style.Failure, title: "Error", message });
     }
-  }, [continuation]);
+  }, [continuation, feedId]);
 
   const handleToggleRead = useCallback((articleId: string, isRead: boolean) => {
     setArticles((prev) => prev.map((a) => (a.id === articleId ? { ...a, isRead } : a)));
@@ -62,7 +67,7 @@ export default function StarredArticlesCommand() {
       onRefresh={fetchData}
       onLoadMore={continuation ? loadMore : undefined}
       hasMore={!!continuation}
-      mode="starred"
+      mode="mixed"
       onToggleRead={handleToggleRead}
       onToggleStar={handleToggleStar}
     />

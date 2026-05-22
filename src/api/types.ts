@@ -2,6 +2,7 @@ export type FreshRSSPreferences = {
   baseUrl: string;
   username: string;
   apiPassword: string;
+  autoMarkAsRead?: boolean;
 };
 
 export type Feed = {
@@ -29,7 +30,7 @@ export type Article = {
   isStarred?: boolean;
 };
 
-export type ArticleListMode = "unread" | "read" | "starred";
+export type ArticleListMode = "unread" | "read" | "starred" | "mixed";
 
 export type ArticleFetchResult = {
   articles: Article[];

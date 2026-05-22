@@ -69,6 +69,14 @@ export default function BrowseByCategoryCommand() {
     fetchCategories();
   }, [fetchCategories]);
 
+  const handleToggleRead = useCallback((articleId: string, isRead: boolean) => {
+    setArticles((prev) => prev.map((a) => (a.id === articleId ? { ...a, isRead } : a)));
+  }, []);
+
+  const handleToggleStar = useCallback((articleId: string, isStarred: boolean) => {
+    setArticles((prev) => prev.map((a) => (a.id === articleId ? { ...a, isStarred } : a)));
+  }, []);
+
   if (selectedCategory) {
     return (
       <ArticleList
@@ -77,7 +85,9 @@ export default function BrowseByCategoryCommand() {
         onRefresh={() => selectCategory(selectedCategory)}
         onLoadMore={continuation ? loadMoreArticles : undefined}
         hasMore={!!continuation}
-        mode="unread"
+        mode="mixed"
+        onToggleRead={handleToggleRead}
+        onToggleStar={handleToggleStar}
       />
     );
   }

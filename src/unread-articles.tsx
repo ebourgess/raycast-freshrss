@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import { getUnreadArticles } from "./api/freshrss";
+import { getUnreadArticles, markAllAsRead, FreshRSSAuthError, FreshRSSApiError } from "./api/freshrss";
 import { ArticleList } from "./components/ArticleList";
 import type { Article } from "./api/types";
-import { showToast, Toast } from "@raycast/api";
-import { FreshRSSAuthError, FreshRSSApiError } from "./api/freshrss";
+import { showToast, Toast, confirmAlert, Alert } from "@raycast/api";
 
 export default function UnreadArticlesCommand() {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -47,6 +46,38 @@ export default function UnreadArticlesCommand() {
     }
   }, [continuation]);
 
+  const handleToggleRead = useCallback((articleId: string, isRead: boolean) => {
+    setArticles((prev) => prev.map((a) => (a.id === articleId ? { ...a, isRead } : a)));
+  }, []);
+
+  const handleToggleStar = useCallback((articleId: string, isStarred: boolean) => {
+    setArticles((prev) => prev.map((a) => (a.id === articleId ? { ...a, isStarred } : a)));
+  }, []);
+
+  const handleMarkAllAsRead = useCallback(async () => {
+    if (articles.length === 0) return;
+    if (
+      !(await confirmAlert({
+        title: "Mark All as Read",
+        message: `Mark ${articles.length} articles as read?`,
+        primaryAction: { title: "Mark All Read" },
+      }))
+    ) {
+      return;
+    }
+    try {
+      await markAllAsRead(articles.map((a) => a.id));
+      setArticles((prev) => prev.map((a) => ({ ...a, isRead: true })));
+      await showToast({ style: Toast.Style.Success, title: "All articles marked as read" });
+    } catch (error: unknown) {
+      const message =
+        error instanceof FreshRSSAuthError || error instanceof FreshRSSApiError
+          ? error.message
+          : "Failed to mark all as read.";
+      await showToast({ style: Toast.Style.Failure, title: "Error", message });
+    }
+  }, [articles]);
+
   return (
     <ArticleList
       articles={articles}
@@ -55,6 +86,9 @@ export default function UnreadArticlesCommand() {
       onLoadMore={continuation ? loadMore : undefined}
       hasMore={!!continuation}
       mode="unread"
+      onToggleRead={handleToggleRead}
+      onToggleStar={handleToggleStar}
+      onMarkAllAsRead={handleMarkAllAsRead}
     />
   );
 }

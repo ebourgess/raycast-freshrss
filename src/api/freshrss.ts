@@ -396,6 +396,21 @@ export async function getCategories(): Promise<Category[]> {
   return categories;
 }
 
+export async function getUnreadCounts(): Promise<Map<string, number>> {
+  const text = await request("/reader/api/0/unread-count", {
+    params: { output: "json" },
+  });
+
+  const data: FreshRSSUnreadCountResponse = JSON.parse(text);
+  const counts = new Map<string, number>();
+  for (const entry of data.unreadcounts || []) {
+    if (entry.id.startsWith("feed/")) {
+      counts.set(entry.id, entry.count);
+    }
+  }
+  return counts;
+}
+
 export async function getArticlesByCategory(categoryId: string, continuation?: string): Promise<ArticleFetchResult> {
   const feeds = await getFeeds();
   const iconMap = buildFeedIconMap(feeds);
@@ -410,6 +425,31 @@ export async function getArticlesByCategory(categoryId: string, continuation?: s
   }
 
   const streamId = encodeURIComponent(categoryId);
+  const text = await request(`/reader/api/0/stream/contents/${streamId}`, { params });
+
+  const data: FreshRSSStreamContentsResponse = JSON.parse(text);
+  const articles = (data.items || []).map((item: FreshRSSStreamItem) => parseStreamItem(item, iconMap));
+
+  return {
+    articles,
+    continuation: data.continuation,
+  };
+}
+
+export async function getArticlesByFeed(feedId: string, continuation?: string): Promise<ArticleFetchResult> {
+  const feeds = await getFeeds();
+  const iconMap = buildFeedIconMap(feeds);
+
+  const params: Record<string, string> = {
+    output: "json",
+    n: "50",
+  };
+
+  if (continuation) {
+    params["c"] = continuation;
+  }
+
+  const streamId = encodeURIComponent(feedId);
   const text = await request(`/reader/api/0/stream/contents/${streamId}`, { params });
 
   const data: FreshRSSStreamContentsResponse = JSON.parse(text);
@@ -472,6 +512,31 @@ export async function removeFeed(feedId: string): Promise<void> {
       ac: "unsubscribe",
       s: feedId,
     },
+  });
+}
+
+export async function editFeed(feedId: string, options: { title?: string; category?: string }): Promise<void> {
+  cache.set(CACHE_KEYS.feeds, "");
+  cache.set(CACHE_KEYS.feedsTTL, "0");
+
+  const params: Record<string, string> = {
+    ac: "edit",
+    s: feedId,
+  };
+
+  if (options.title) {
+    params["t"] = options.title;
+  }
+
+  if (options.category) {
+    params["a"] = options.category;
+  }
+
+  await request("/reader/api/0/subscription/edit", {
+    method: "POST",
+    requireAuth: true,
+    requireWriteToken: true,
+    params,
   });
 }
 
@@ -607,6 +672,26 @@ export async function unstarArticle(articleId: string): Promise<void> {
       i: articleId,
       r: "user/-/state/com.google/starred",
     },
+  });
+}
+
+export async function markAllAsRead(articleIds: string[]): Promise<void> {
+  if (articleIds.length === 0) return;
+
+  const writeToken = await getToken();
+
+  const bodyParts: string[] = [];
+  bodyParts.push(`T=${encodeURIComponent(writeToken)}`);
+  bodyParts.push(`a=${encodeURIComponent("user/-/state/com.google/read")}`);
+  for (const id of articleIds) {
+    bodyParts.push(`i=${encodeURIComponent(id)}`);
+  }
+
+  await request("/reader/api/0/edit-tag", {
+    method: "POST",
+    requireAuth: true,
+    requireWriteToken: false,
+    body: bodyParts.join("&"),
   });
 }
 
