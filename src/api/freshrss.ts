@@ -432,8 +432,8 @@ export async function addFeed(feedUrl: string, category?: string): Promise<void>
       requireWriteToken: true,
       params: {
         ac: "subscribe",
-        s: feedUrl,
-        a: `user/-/label/${category}`,
+        s: `feed/${feedUrl}`,
+        a: category,
       },
     });
   } else {

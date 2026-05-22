@@ -58,7 +58,7 @@ export default function AddFeedCommand() {
       <Form.Dropdown id="category" title="Category" info="Optional: assign the feed to a category">
         <Form.Dropdown.Item value="" title="No category" />
         {categories.map((cat) => (
-          <Form.Dropdown.Item key={cat.id} value={cat.label} title={cat.label} />
+          <Form.Dropdown.Item key={cat.id} value={cat.id} title={cat.label} />
         ))}
       </Form.Dropdown>
     </Form>
