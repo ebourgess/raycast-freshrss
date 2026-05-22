@@ -110,7 +110,8 @@ type ArticleListProps = {
 };
 
 export function ArticleList({ articles, isLoading, onRefresh, onLoadMore, hasMore, mode }: ArticleListProps) {
-  const title = mode === "unread" ? "Unread Articles" : mode === "read" ? "Read Articles" : "Starred Articles";
+  const modeLabel = mode === "unread" ? "Unread Articles" : mode === "read" ? "Read Articles" : "Starred Articles";
+  const title = `${modeLabel} (${articles.length})` as const;
 
   const callbacks: ArticleActionCallbacks = {
     onRefresh,
