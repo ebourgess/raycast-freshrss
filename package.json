@@ -118,7 +118,7 @@
   },
 "devDependencies": {
     "@raycast/api": "^1.83.0",
-    "@types/node": "^22.0.0",
+    "@types/node": "^24.0.0",
     "typescript": "^5.4.0"
   },
   "scripts": {
