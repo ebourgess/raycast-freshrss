@@ -76,6 +76,7 @@ export default function SearchArticlesCommand() {
         mode="mixed"
         onToggleRead={handleToggleRead}
         onToggleStar={handleToggleStar}
+        onSearchTextChange={setSearchText}
       />
     );
   }

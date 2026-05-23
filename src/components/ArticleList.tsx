@@ -114,9 +114,10 @@ type ArticleListProps = {
   onToggleRead?: (articleId: string, isRead: boolean) => void;
   onToggleStar?: (articleId: string, isStarred: boolean) => void;
   onMarkAllAsRead?: () => Promise<void>;
+  onSearchTextChange?: (text: string) => void;
 };
 
-export function ArticleList({ articles, isLoading, onRefresh, onLoadMore, hasMore, mode, onToggleRead, onToggleStar, onMarkAllAsRead }: ArticleListProps) {
+export function ArticleList({ articles, isLoading, onRefresh, onLoadMore, hasMore, mode, onToggleRead, onToggleStar, onMarkAllAsRead, onSearchTextChange }: ArticleListProps) {
   const modeLabel = mode === "unread" ? "Unread Articles" : mode === "read" ? "Read Articles" : mode === "starred" ? "Starred Articles" : "Articles";
   const title = `${modeLabel} (${articles.length})` as const;
 
@@ -129,7 +130,7 @@ export function ArticleList({ articles, isLoading, onRefresh, onLoadMore, hasMor
   };
 
   return (
-    <List isLoading={isLoading} navigationTitle={title} searchBarPlaceholder="Search articles..." isShowingDetail>
+    <List isLoading={isLoading} navigationTitle={title} searchBarPlaceholder="Search articles..." isShowingDetail onSearchTextChange={onSearchTextChange}>
       {articles.length === 0 && !isLoading ? (
         <List.EmptyView
           title={mode === "unread" ? "No unread articles" : mode === "read" ? "No read articles" : "No starred articles"}

@@ -14,12 +14,6 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "primary",
-      "title": "FreshRSS",
-      "description": "Browse FreshRSS feeds",
-      "mode": "view"
-    },
-    {
       "name": "list-feeds",
       "title": "List Feeds",
       "description": "List all subscribed feeds",
@@ -71,7 +65,7 @@
       "name": "refresh-feeds",
       "title": "Refresh Feeds",
       "description": "Force refresh all feeds and clear cache",
-      "mode": "no-view"
+      "mode": "view"
     }
   ],
   "preferences": [
