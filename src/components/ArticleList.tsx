@@ -243,13 +243,7 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
           ) : null}
-          {article.id ? (
-            <Action.CopyToClipboard
-              content={article.id}
-              title="Copy Article ID"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            />
-          ) : null}
+          
           {article.url ? (
             <Action
               title="Save to Readwise Reader"
