@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { List, Action, ActionPanel, Icon, Color, Detail, getPreferenceValues } from "@raycast/api";
 import { showToast, Toast, openCommandPreferences, open } from "@raycast/api";
 import type { Article, ArticleListMode, FreshRSSPreferences } from "../api/types";
@@ -319,12 +319,19 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
 
 function ArticleDetailView({ article, callbacks }: { article: Article; callbacks: ArticleActionCallbacks }) {
   const { autoMarkAsRead } = getPreferenceValues<FreshRSSPreferences>();
+  const [localIsRead, setLocalIsRead] = useState(article.isRead);
+  const hasMarkedRef = useRef(false);
 
   useEffect(() => {
-    if (autoMarkAsRead && !article.isRead) {
+    if (autoMarkAsRead && !article.isRead && !hasMarkedRef.current) {
+      hasMarkedRef.current = true;
       markArticleRead(article.id).then(() => {
+        setLocalIsRead(true);
         callbacks.onToggleRead?.(article.id, true);
-      }).catch(() => {});
+      }).catch(async (error: unknown) => {
+        const message = error instanceof FreshRSSAuthError || error instanceof FreshRSSApiError ? error.message : "Failed to auto-mark as read";
+        await showToast({ style: Toast.Style.Failure, title: "Auto Mark as Read Failed", message });
+      });
     }
   }, []);
 
@@ -334,7 +341,7 @@ function ArticleDetailView({ article, callbacks }: { article: Article; callbacks
       {article.author ? <Detail.Metadata.Label title="Author" text={article.author} /> : null}
       {article.publishedAt ? <Detail.Metadata.Label title="Published" text={new Date(article.publishedAt).toLocaleString()} /> : null}
       {article.updatedAt ? <Detail.Metadata.Label title="Updated" text={new Date(article.updatedAt).toLocaleString()} /> : null}
-      {article.isRead !== undefined ? <Detail.Metadata.Label title="Status" text={article.isRead ? "Read" : "Unread"} /> : null}
+      {localIsRead !== undefined ? <Detail.Metadata.Label title="Status" text={localIsRead ? "Read" : "Unread"} /> : null}
       {article.isStarred !== undefined ? <Detail.Metadata.Label title="Starred" text={article.isStarred ? "Yes" : "No"} /> : null}
     </Detail.Metadata>
   );
@@ -379,19 +386,29 @@ function ArticleDetailView({ article, callbacks }: { article: Article; callbacks
               shortcut={{ modifiers: ["ctrl", "shift"], key: "w" }}
             />
           ) : null}
-          {article.isRead !== undefined && !article.isRead ? (
+          {localIsRead !== undefined && !localIsRead ? (
             <Action
               title="Mark as Read"
               icon={Icon.Circle}
-              onAction={() => handleToggleRead(article, false, () => callbacks.onToggleRead?.(article.id, true))}
+              onAction={() => {
+                handleToggleRead(article, false, () => {
+                  setLocalIsRead(true);
+                  callbacks.onToggleRead?.(article.id, true);
+                });
+              }}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
             />
           ) : null}
-          {article.isRead ? (
+          {localIsRead ? (
             <Action
               title="Mark as Unread"
               icon={Icon.Circle}
-              onAction={() => handleToggleRead(article, true, () => callbacks.onToggleRead?.(article.id, false))}
+              onAction={() => {
+                handleToggleRead(article, true, () => {
+                  setLocalIsRead(false);
+                  callbacks.onToggleRead?.(article.id, false);
+                });
+              }}
               shortcut={{ modifiers: ["cmd"], key: "u" }}
             />
           ) : null}
