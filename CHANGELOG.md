@@ -2,6 +2,15 @@
 
 All notable changes to the FreshRSS Raycast extension will be documented in this file.
 
+## [1.0.1] - 2026-05-25
+
+### Fixed
+
+- Stream contents endpoint returning "Not Found" errors due to `encodeURIComponent` encoding slashes in stream IDs (e.g. `user/-/label/Tech`) — FreshRSS expects these as literal path segments
+- Spurious "API endpoint not found" errors caused by a body-content check that matched any response containing the substring "Not Found" (e.g. articles with that phrase in their title/content)
+- Search articles returning all articles instead of filtered results — the `q` query parameter is not supported by FreshRSS's Google Reader API; replaced with client-side filtering across title, summary, author, URL, and feed title
+- Removed unused `FreshRSSSearchItemsResponse` type
+
 ## [1.0.0] - 2026-05-25
 
 ### Added
