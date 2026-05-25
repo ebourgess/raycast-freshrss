@@ -2,6 +2,8 @@
 
 Browse and manage your FreshRSS feeds and articles directly from Raycast.
 
+Full technical writeup can be found [here](https://ebourgess.dev/posts/building-a-freshrss-raycast-extension/)
+
 ## Features
 
 - **List Feeds** — View all subscribed RSS/Atom feeds with icons
