@@ -68,10 +68,10 @@ This extension uses the FreshRSS Google Reader-compatible API:
 | Add feed with category | `/reader/api/0/subscription/edit`                                                | POST   |
 | Remove feed          | `/reader/api/0/subscription/edit`                                                   | POST   |
 | List categories      | `/reader/api/0/tag/list`                                                            | GET    |
-| Search articles      | `/reader/api/0/search/items`                                                        | GET    |
-| Unread articles      | `/reader/api/0/stream/contents/user/-/state/com.google/reading-list`                | GET    |
-| Read articles        | `/reader/api/0/stream/contents/user/-/state/com.google/reading-list`                 | GET    |
-| Starred articles     | `/reader/api/0/stream/contents/user/-/state/com.google/starred`                      | GET    |
+| Search articles      | `/reader/api/0/stream/contents/reading-list` with `q`                               | GET    |
+| Unread articles      | `/reader/api/0/stream/contents/reading-list` with `xt=user/-/state/com.google/read` | GET    |
+| Read articles        | `/reader/api/0/stream/contents/reading-list` with `it=user/-/state/com.google/read` | GET    |
+| Starred articles     | `/reader/api/0/stream/contents/reading-list` with `it=user/-/state/com.google/starred` | GET    |
 | Articles by category | `/reader/api/0/stream/contents/{categoryId}`                                        | GET    |
 | Mark read/unread     | `/reader/api/0/edit-tag`                                                            | POST   |
 | Star/unstar          | `/reader/api/0/edit-tag`                                                            | POST   |

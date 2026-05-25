@@ -12,7 +12,7 @@ import type {
   FreshRSSStreamContentsResponse,
   FreshRSSStreamItem,
   FreshRSSTagListResponse,
-  FreshRSSSearchItemsResponse,
+  
 } from "./types";
 
 let cachedAuthToken: string | null = null;
@@ -176,15 +176,6 @@ async function request(
   }
 
   const responseText = await response.text();
-
-  if (responseText.includes("Not Found") || responseText.includes("PAGE NOT FOUND")) {
-    throw new FreshRSSApiError(
-      `FreshRSS API endpoint not found at ${url.toString()}. ` +
-        `Make sure the base URL is correct and API access is enabled. ` +
-        `Expected URL format: https://your-instance.example/api/greader.php`,
-      404
-    );
-  }
 
   return responseText;
 }
@@ -424,8 +415,7 @@ export async function getArticlesByCategory(categoryId: string, continuation?: s
     params["c"] = continuation;
   }
 
-  const streamId = encodeURIComponent(categoryId);
-  const text = await request(`/reader/api/0/stream/contents/${streamId}`, { params });
+  const text = await request(`/reader/api/0/stream/contents/${categoryId}`, { params });
 
   const data: FreshRSSStreamContentsResponse = JSON.parse(text);
   const articles = (data.items || []).map((item: FreshRSSStreamItem) => parseStreamItem(item, iconMap));
@@ -449,8 +439,7 @@ export async function getArticlesByFeed(feedId: string, continuation?: string): 
     params["c"] = continuation;
   }
 
-  const streamId = encodeURIComponent(feedId);
-  const text = await request(`/reader/api/0/stream/contents/${streamId}`, { params });
+  const text = await request(`/reader/api/0/stream/contents/${feedId}`, { params });
 
   const data: FreshRSSStreamContentsResponse = JSON.parse(text);
   const articles = (data.items || []).map((item: FreshRSSStreamItem) => parseStreamItem(item, iconMap));
@@ -580,7 +569,7 @@ async function fetchArticleStream(
 
 export async function getUnreadArticles(continuation?: string): Promise<ArticleFetchResult> {
   return fetchArticleStream(
-    "user/-/state/com.google/reading-list",
+    "reading-list",
     { xt: "user/-/state/com.google/read" },
     continuation
   );
@@ -588,7 +577,7 @@ export async function getUnreadArticles(continuation?: string): Promise<ArticleF
 
 export async function getReadArticles(continuation?: string): Promise<ArticleFetchResult> {
   return fetchArticleStream(
-    "user/-/state/com.google/reading-list",
+    "reading-list",
     { it: "user/-/state/com.google/read" },
     continuation
   );
@@ -596,18 +585,36 @@ export async function getReadArticles(continuation?: string): Promise<ArticleFet
 
 export async function getStarredArticles(continuation?: string): Promise<ArticleFetchResult> {
   return fetchArticleStream(
-    "user/-/state/com.google/starred",
-    {},
+    "reading-list",
+    { it: "user/-/state/com.google/starred" },
     continuation
   );
 }
 
 export async function searchArticles(query: string, continuation?: string): Promise<ArticleFetchResult> {
-  return fetchArticleStream(
-    "user/-/state/com.google/reading-list",
-    { q: query },
-    continuation
-  );
+  const result = await fetchArticleStream("reading-list", {}, continuation);
+
+  const lowerQuery = query.toLowerCase();
+  const filtered = result.articles.filter((article) => {
+    const title = (article.title || "").toLowerCase();
+    const summary = (article.summary || "").toLowerCase();
+    const author = (article.author || "").toLowerCase();
+    const url = (article.url || "").toLowerCase();
+    const feedTitle = (article.feedTitle || "").toLowerCase();
+
+    return (
+      title.includes(lowerQuery) ||
+      summary.includes(lowerQuery) ||
+      author.includes(lowerQuery) ||
+      url.includes(lowerQuery) ||
+      feedTitle.includes(lowerQuery)
+    );
+  });
+
+  return {
+    articles: filtered,
+    continuation: result.continuation,
+  };
 }
 
 export async function markArticleRead(articleId: string): Promise<void> {
