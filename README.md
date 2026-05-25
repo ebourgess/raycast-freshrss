@@ -68,11 +68,12 @@ This extension uses the FreshRSS Google Reader-compatible API:
 | Add feed with category | `/reader/api/0/subscription/edit`                                                | POST   |
 | Remove feed          | `/reader/api/0/subscription/edit`                                                   | POST   |
 | List categories      | `/reader/api/0/tag/list`                                                            | GET    |
-| Search articles      | `/reader/api/0/stream/contents/reading-list` with `q`                               | GET    |
+| Search articles      | `/reader/api/0/stream/contents/reading-list` (client-side filtering)                | GET    |
 | Unread articles      | `/reader/api/0/stream/contents/reading-list` with `xt=user/-/state/com.google/read` | GET    |
 | Read articles        | `/reader/api/0/stream/contents/reading-list` with `it=user/-/state/com.google/read` | GET    |
 | Starred articles     | `/reader/api/0/stream/contents/reading-list` with `it=user/-/state/com.google/starred` | GET    |
 | Articles by category | `/reader/api/0/stream/contents/{categoryId}`                                        | GET    |
+| Articles by feed     | `/reader/api/0/stream/contents/{feedId}`                                            | GET    |
 | Mark read/unread     | `/reader/api/0/edit-tag`                                                            | POST   |
 | Star/unstar          | `/reader/api/0/edit-tag`                                                            | POST   |
 
@@ -133,7 +134,7 @@ Article lists support pagination via the FreshRSS continuation token. Select "Lo
 
 ### Search
 
-The "Search Articles" command provides full-text search across all feeds with a 300ms debounce to avoid excessive API calls. Results render through the same `ArticleList` component, so you get the side-by-side preview, keyboard shortcuts, and all article actions automatically.
+The "Search Articles" command fetches articles from the reading-list and filters them client-side across title, summary, author, URL, and feed title, with a 300ms debounce to avoid excessive API calls. FreshRSS's Google Reader API does not support server-side search via the `q` parameter. Results render through the same `ArticleList` component, so you get the side-by-side preview, keyboard shortcuts, and all article actions automatically.
 
 ### Caching
 
