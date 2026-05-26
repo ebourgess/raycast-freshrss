@@ -17,7 +17,9 @@ type ExtensionPreferences = {
   /** Readwise Token - Your Readwise access token for saving articles to Reader (optional). Get yours at readwise.io/access_token */
   "readwiseToken"?: string,
   /** Auto Mark as Read - Automatically mark articles as read when you open them */
-  "autoMarkAsRead": boolean
+  "autoMarkAsRead": boolean,
+  /** Mark Read on Readwise Save - Automatically mark articles as read when saving to Readwise Reader */
+  "markReadOnReadwise": boolean
 }
 
 /** Preferences accessible in all the extension's commands */
@@ -40,6 +42,8 @@ declare namespace Preferences {
   export type BrowseCategories = ExtensionPreferences & {}
   /** Preferences accessible in the `search-articles` command */
   export type SearchArticles = ExtensionPreferences & {}
+  /** Preferences accessible in the `random-article` command */
+  export type RandomArticle = ExtensionPreferences & {}
   /** Preferences accessible in the `refresh-feeds` command */
   export type RefreshFeeds = ExtensionPreferences & {}
 }
@@ -61,6 +65,8 @@ declare namespace Arguments {
   export type BrowseCategories = {}
   /** Arguments passed to the `search-articles` command */
   export type SearchArticles = {}
+  /** Arguments passed to the `random-article` command */
+  export type RandomArticle = {}
   /** Arguments passed to the `refresh-feeds` command */
   export type RefreshFeeds = {}
 }

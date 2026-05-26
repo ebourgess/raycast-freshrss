@@ -131,6 +131,8 @@ type ArticleListProps = {
 export function ArticleList({ articles, isLoading, onRefresh, onLoadMore, hasMore, mode, onToggleRead, onToggleStar, onMarkAllAsRead, onSearchTextChange }: ArticleListProps) {
   const modeLabel = mode === "unread" ? "Unread Articles" : mode === "read" ? "Read Articles" : mode === "starred" ? "Starred Articles" : "Articles";
   const title = `${modeLabel} (${articles.length})` as const;
+  const { autoMarkAsRead } = getPreferenceValues<FreshRSSPreferences>();
+  const markedRef = useRef<Set<string>>(new Set());
 
   const callbacks: ArticleActionCallbacks = {
     onRefresh,
@@ -140,8 +142,22 @@ export function ArticleList({ articles, isLoading, onRefresh, onLoadMore, hasMor
     onMarkAllAsRead,
   };
 
+  const handleSelectionChange = useCallback((id: string | null) => {
+    if (!autoMarkAsRead || !id || id === "__load_more__") return;
+    const article = articles.find((a) => a.id === id);
+    if (!article || article.isRead || markedRef.current.has(id)) return;
+    markedRef.current.add(id);
+    markArticleRead(id).then(() => {
+      callbacks.onToggleRead?.(id, true);
+    }).catch(async (error: unknown) => {
+      markedRef.current.delete(id);
+      const message = error instanceof FreshRSSAuthError || error instanceof FreshRSSApiError ? error.message : "Failed to auto-mark as read";
+      await showToast({ style: Toast.Style.Failure, title: "Auto Mark as Read Failed", message });
+    });
+  }, [autoMarkAsRead, articles, callbacks]);
+
   return (
-    <List isLoading={isLoading} navigationTitle={title} searchBarPlaceholder="Search articles..." isShowingDetail onSearchTextChange={onSearchTextChange}>
+    <List isLoading={isLoading} navigationTitle={title} searchBarPlaceholder="Search articles..." isShowingDetail onSearchTextChange={onSearchTextChange} onSelectionChange={handleSelectionChange}>
       {articles.length === 0 && !isLoading ? (
         <List.EmptyView
           title={mode === "unread" ? "No unread articles" : mode === "read" ? "No read articles" : "No starred articles"}

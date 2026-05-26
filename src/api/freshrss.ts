@@ -12,7 +12,7 @@ import type {
   FreshRSSStreamContentsResponse,
   FreshRSSStreamItem,
   FreshRSSTagListResponse,
-  
+  FreshRSSUnreadCountResponse,
 } from "./types";
 
 let cachedAuthToken: string | null = null;

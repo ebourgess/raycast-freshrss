@@ -14,9 +14,12 @@ Full technical writeup can be found [here](https://ebourgess.dev/posts/building-
 - **Starred Articles** — Browse starred/favorite articles with pagination, unstar, and read/unread actions
 - **Browse by Category** — Navigate articles by category/label folders
 - **Search Articles** — Full-text search across all feeds with debounced input and pagination
+- **Random Article** — Open a random article from your feeds for serendipitous reading
 - **Refresh Feeds** — Force refresh all feeds and clear the local cache
 - **Side-by-side Preview** — Read article content next to the list as you navigate
 - **Readwise Reader Integration** — Save articles to Readwise Reader with one action
+- **Auto Mark as Read** — Optionally mark articles as read when selected in the list or opened in detail view
+- **Mark Read on Readwise Save** — Optionally mark articles as read when saving to Readwise Reader
 - **Keyboard Shortcuts** — Every action has a keyboard shortcut
 
 ## Prerequisites
@@ -52,6 +55,8 @@ Configure the extension in Raycast Preferences:
 | Username    | Your FreshRSS username                           | `alice`                        |
 | API Password| Your FreshRSS **API password** (not your login)  | *(your API password)*          |
 | Readwise Token | Your Readwise access token (optional)        | *(from readwise.io/access_token)* |
+| Auto Mark as Read | Mark articles as read when selected/opened | Off (checkbox) |
+| Mark Read on Readwise Save | Mark articles as read when saving to Readwise | Off (checkbox) |
 
 The API endpoint is constructed automatically as `{Base URL}/api/greader.php`.
 
@@ -84,8 +89,7 @@ This extension uses the FreshRSS Google Reader-compatible API:
 | `Cmd+Enter` | View article (push to full detail) |
 | `Cmd+O` | Open in browser |
 | `Cmd+C` | Copy article URL |
-| `Cmd+Shift+C` | Copy article ID |
-| `Cmd+R` | Mark as read |
+| `Cmd+R` | Mark as read / Another random article (in Random Article) |
 | `Cmd+U` | Mark as unread |
 | `Cmd+S` | Star article |
 | `Cmd+Shift+S` | Unstar article |
@@ -151,6 +155,12 @@ The "Browse by Category" command shows all labels/folders from your FreshRSS acc
 ### Readwise Reader Integration
 
 Set your Readwise access token in Raycast Preferences to enable the "Save to Readwise Reader" action. Articles are saved via the Readwise API (`POST https://readwise.io/api/v3/save/`) with the article URL, title, author, and summary.
+
+Enable the "Mark Read on Readwise Save" preference to automatically mark articles as read when you save them to Readwise Reader.
+
+### Random Article
+
+The "Random Article" command fetches all articles from your FreshRSS instance and opens a randomly selected one in a detail view. Press `Cmd+R` to get another random article. Supports all standard actions including Readwise save, mark read/unread, and star/unstar.
 
 ### Feed Management
 

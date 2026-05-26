@@ -2,6 +2,18 @@
 
 All notable changes to the FreshRSS Raycast extension will be documented in this file.
 
+## [1.1.0] - 2026-05-26
+
+### Added
+
+- Random Article command (`random-article`) — opens a random article from all feeds with a "shuffle" action to get another
+- Mark Read on Readwise Save preference — automatically mark articles as read when saving to Readwise Reader
+- `getAllArticles` API function for fetching the full reading list without read/unread/starred filters
+
+### Fixed
+
+- Auto mark-as-read not triggering when selecting articles in the list view — it only worked when pushing into the detail view; now marks articles as read on selection via `onSelectionChange`
+
 ## [1.0.1] - 2026-05-25
 
 ### Fixed
