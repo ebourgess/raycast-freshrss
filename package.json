@@ -110,6 +110,15 @@
       "required": false,
       "default": false,
       "label": "Auto Mark as Read"
+    },
+    {
+      "name": "markReadOnReadwise",
+      "title": "Mark Read on Readwise Save",
+      "description": "Automatically mark articles as read when saving to Readwise Reader",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Mark Read on Readwise Save"
     }
   ],
   "dependencies": {

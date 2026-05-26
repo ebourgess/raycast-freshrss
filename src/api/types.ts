@@ -3,6 +3,7 @@ export type FreshRSSPreferences = {
   username: string;
   apiPassword: string;
   autoMarkAsRead?: boolean;
+  markReadOnReadwise?: boolean;
 };
 
 export type Feed = {
