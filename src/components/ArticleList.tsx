@@ -77,7 +77,7 @@ async function handleToggleStar(article: Article, isStarred: boolean, onDone?: (
   }
 }
 
-async function handleSaveToReadwise(article: Article) {
+async function handleSaveToReadwise(article: Article, callbacks: ArticleActionCallbacks) {
   if (!article.url) {
     await showToast({ style: Toast.Style.Failure, title: "Error", message: "This article has no URL" });
     return;
@@ -93,6 +93,17 @@ async function handleSaveToReadwise(article: Article) {
       author: article.author,
       summary: article.summary,
     });
+    const prefs = getPreferenceValues<FreshRSSPreferences>();
+    if (prefs.markReadOnReadwise && !article.isRead) {
+      try {
+        await markArticleRead(article.id);
+        callbacks.onToggleRead?.(article.id, true);
+      } catch {
+        await showToast({ style: Toast.Style.Failure, title: "Error", message: "Saved to Readwise but failed to mark as read" });
+        return;
+      }
+    }
+    callbacks.onRefresh?.();
     await showToast({ style: Toast.Style.Success, title: "Saved to Readwise Reader" });
   } catch (error: unknown) {
     const message = error instanceof ReadwiseError ? error.message : "Failed to save to Readwise Reader";
@@ -249,7 +260,7 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
             <Action
               title="Save to Readwise Reader"
               icon={Icon.Bookmark}
-              onAction={() => handleSaveToReadwise(article)}
+              onAction={() => handleSaveToReadwise(article, callbacks)}
               shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
             />
           ) : null}
@@ -369,7 +380,7 @@ function ArticleDetailView({ article, callbacks }: { article: Article; callbacks
             <Action
               title="Save to Readwise Reader"
               icon={Icon.Bookmark}
-              onAction={() => handleSaveToReadwise(article)}
+              onAction={() => handleSaveToReadwise(article, callbacks)}
               shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
             />
           ) : null}
