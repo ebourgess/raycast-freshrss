@@ -575,6 +575,10 @@ export async function getUnreadArticles(continuation?: string): Promise<ArticleF
   );
 }
 
+export async function getAllArticles(continuation?: string): Promise<ArticleFetchResult> {
+  return fetchArticleStream("reading-list", {}, continuation);
+}
+
 export async function getReadArticles(continuation?: string): Promise<ArticleFetchResult> {
   return fetchArticleStream(
     "reading-list",
