@@ -62,6 +62,12 @@
       "mode": "view"
     },
     {
+      "name": "random-article",
+      "title": "Random Article",
+      "description": "Open a random article from your feeds",
+      "mode": "view"
+    },
+    {
       "name": "refresh-feeds",
       "title": "Refresh Feeds",
       "description": "Force refresh all feeds and clear cache",
