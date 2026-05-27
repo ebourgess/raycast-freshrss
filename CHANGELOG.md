@@ -2,7 +2,7 @@
 
 All notable changes to the FreshRSS Raycast extension will be documented in this file.
 
-## [1.1.1] - 2026-05-27
+## [1.1.1] - {PR_MERGE_DATE}
 
 ### Fixed
 

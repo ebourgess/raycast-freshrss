@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 
 type ExtensionPreferences = {
-  /** Base URL - Your FreshRSS instance URL (e.g. https://feed.ebourgess.dev) */
+  /** Base URL - Your FreshRSS instance URL (e.g. https://feed.example.com) */
   "baseUrl": string,
   /** Username - Your FreshRSS username */
   "username": string,
