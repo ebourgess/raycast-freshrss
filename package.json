@@ -125,11 +125,22 @@
       "required": false,
       "default": false,
       "label": "Mark Read on Readwise Save"
+    },
+    {
+      "name": "debugLogging",
+      "title": "Debug Logging",
+      "description": "Enable debug logging to console for troubleshooting API requests",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Debug Logging"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.83.0",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "bcryptjs": "^3.0.3",
+    "node-html-markdown": "^2.0.0"
   },
 "devDependencies": {
     "@raycast/api": "^1.83.0",

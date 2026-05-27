@@ -19,7 +19,9 @@ type ExtensionPreferences = {
   /** Auto Mark as Read - Automatically mark articles as read when you open them */
   "autoMarkAsRead": boolean,
   /** Mark Read on Readwise Save - Automatically mark articles as read when saving to Readwise Reader */
-  "markReadOnReadwise": boolean
+  "markReadOnReadwise": boolean,
+  /** Debug Logging - Enable debug logging to console for troubleshooting API requests */
+  "debugLogging": boolean
 }
 
 /** Preferences accessible in all the extension's commands */
