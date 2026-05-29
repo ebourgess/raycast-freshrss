@@ -1,10 +1,10 @@
 import * as React from "react";
 import { useEffect, useMemo, useState } from "react";
-import { Action, ActionPanel, Color, Detail, Icon, Toast, getPreferenceValues, open, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, Toast, showToast } from "@raycast/api";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import { api, type Article } from "./api";
 import { cleanTitle } from "./article-list";
-import { saveToGoodlinks, GoodLinksError } from "./api/goodlinks";
+import SaveToGoodlinksForm from "./components/SaveToGoodlinksForm";
 
 const nhm = new NodeHtmlMarkdown({
   bulletMarker: "-",
@@ -37,31 +37,6 @@ export function isRead(article: Article): boolean {
 
 export function isStarred(article: Article): boolean {
   return article.categories?.some((c) => c.endsWith("/state/com.google/starred")) ?? false;
-}
-
-async function handleSaveToGoodlinks(article: Article, onToggleRead?: (article: Article, markRead: boolean) => void) {
-  const url = getArticleUrl(article);
-  if (!url) {
-    await showToast({ style: Toast.Style.Failure, title: "Error", message: "This article has no URL" });
-    return;
-  }
-  try {
-    await saveToGoodlinks({ url, title: cleanTitle(article.title) });
-    const prefs = getPreferenceValues<Preferences>();
-    if (prefs.markReadOnGoodlinks && !isRead(article)) {
-      try {
-        await api.markAsRead(article.id);
-        onToggleRead?.(article, true);
-      } catch {
-        await showToast({ style: Toast.Style.Failure, title: "Error", message: "Saved to GoodLinks but failed to mark as read" });
-        return;
-      }
-    }
-    await showToast({ style: Toast.Style.Success, title: "Saved to GoodLinks" });
-  } catch (error: unknown) {
-    const message = error instanceof GoodLinksError ? error.message : "Failed to save to GoodLinks";
-    await showToast({ style: Toast.Style.Failure, title: "Error", message });
-  }
 }
 
 export function getArticleUrl(article: Article): string {
@@ -222,19 +197,21 @@ export default function ArticleDetail({ article, onToggleRead, onToggleStar, ext
           </ActionPanel.Section>
           <ActionPanel.Section title="Save">
             {url ? (
-              <Action
+              <Action.Push
                 title="Save to GoodLinks"
                 icon={Icon.Link}
-                onAction={() => handleSaveToGoodlinks(article, onToggleRead)}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
-              />
-            ) : null}
-            {url ? (
-              <Action
-                title="Open GoodLinks"
-                icon={Icon.ArrowRight}
-                onAction={() => open("goodlinks://")}
-                shortcut={{ modifiers: ["ctrl", "shift"], key: "g" }}
+                target={
+                  <SaveToGoodlinksForm
+                    url={url}
+                    title={cleanTitle(article.title)}
+                    onMarkRead={async () => {
+                      await api.markAsRead(article.id);
+                      setRead(true);
+                      onToggleRead?.(article, true);
+                    }}
+                  />
+                }
               />
             ) : null}
           </ActionPanel.Section>

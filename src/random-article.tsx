@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Detail, Action, ActionPanel, Icon, getPreferenceValues, showToast, Toast, open, openCommandPreferences } from "@raycast/api";
 import { getAllArticles, markArticleRead, markArticleUnread, starArticle, unstarArticle, FreshRSSAuthError, FreshRSSApiError } from "./api/freshrss";
 import { saveToReadwise, hasReadwiseToken, ReadwiseError } from "./api/readwise";
-import { saveToGoodlinks, GoodLinksError } from "./api/goodlinks";
+import SaveToGoodlinksForm from "./components/SaveToGoodlinksForm";
 import type { Article } from "./api/types";
 
 async function handleToggleRead(article: Article, onDone?: () => void) {
@@ -64,33 +64,6 @@ async function handleSaveToReadwiseAction(article: Article, onDone?: () => void)
     await showToast({ style: Toast.Style.Success, title: "Saved to Readwise Reader" });
   } catch (error: unknown) {
     const message = error instanceof ReadwiseError ? error.message : "Failed to save to Readwise Reader";
-    await showToast({ style: Toast.Style.Failure, title: "Error", message });
-  }
-}
-
-async function handleSaveToGoodlinksAction(article: Article, onDone?: () => void) {
-  if (!article.url) {
-    await showToast({ style: Toast.Style.Failure, title: "Error", message: "This article has no URL" });
-    return;
-  }
-  try {
-    await saveToGoodlinks({
-      url: article.url,
-      title: article.title,
-    });
-    const prefs = getPreferenceValues<Preferences>();
-    if (prefs.markReadOnGoodlinks && !article.isRead) {
-      try {
-        await markArticleRead(article.id);
-      } catch {
-        await showToast({ style: Toast.Style.Failure, title: "Error", message: "Saved to GoodLinks but failed to mark as read" });
-        return;
-      }
-    }
-    onDone?.();
-    await showToast({ style: Toast.Style.Success, title: "Saved to GoodLinks" });
-  } catch (error: unknown) {
-    const message = error instanceof GoodLinksError ? error.message : "Failed to save to GoodLinks";
     await showToast({ style: Toast.Style.Failure, title: "Error", message });
   }
 }
@@ -213,24 +186,21 @@ export default function RandomArticleCommand() {
             />
           ) : null}
           {article.url ? (
-            <Action
+            <Action.Push
               title="Save to GoodLinks"
               icon={Icon.Link}
-              onAction={() => handleSaveToGoodlinksAction(article, () => {
-                const prefs = getPreferenceValues<Preferences>();
-                if (prefs.markReadOnGoodlinks && !localIsRead) {
-                  setLocalIsRead(true);
-                }
-              })}
               shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
-            />
-          ) : null}
-          {article.url ? (
-            <Action
-              title="Open GoodLinks"
-              icon={Icon.ArrowRight}
-              onAction={() => open("goodlinks://")}
-              shortcut={{ modifiers: ["ctrl", "shift"], key: "g" }}
+              target={
+                <SaveToGoodlinksForm
+                  url={article.url}
+                  title={article.title}
+                  summary={article.summary}
+                  onMarkRead={async () => {
+                    await markArticleRead(article.id);
+                    setLocalIsRead(true);
+                  }}
+                />
+              }
             />
           ) : null}
           {!localIsRead ? (

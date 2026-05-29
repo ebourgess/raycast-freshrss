@@ -108,6 +108,22 @@
       "placeholder": "Enter your Readwise access token"
     },
     {
+      "name": "goodlinksApiToken",
+      "title": "GoodLinks API Token",
+      "description": "Your GoodLinks API token (optional). Enable the API in GoodLinks Settings → API and copy the token.",
+      "type": "password",
+      "required": false,
+      "placeholder": "Enter your GoodLinks API token"
+    },
+    {
+      "name": "goodlinksApiUrl",
+      "title": "GoodLinks API URL",
+      "description": "The base URL for the GoodLinks API (defaults to http://localhost:9428)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "http://localhost:9428"
+    },
+    {
       "name": "autoMarkAsRead",
       "title": "Auto Mark as Read",
       "description": "Automatically mark articles as read when you open them",

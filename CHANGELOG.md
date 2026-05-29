@@ -2,6 +2,15 @@
 
 All notable changes to the FreshRSS Raycast extension will be documented in this file.
 
+## [1.2.0] - {PR_MERGE_DATE}
+
+### Added
+
+- Save to GoodLinks integration using the GoodLinks local REST API
+- Tag prompt when saving to GoodLinks — shows existing tags and allows adding comma-separated tags
+- GoodLinks API Token and API URL preferences
+- Mark Read on GoodLinks Save preference — automatically mark articles as read when saving to GoodLinks
+
 ## [1.1.1] - {PR_MERGE_DATE}
 
 ### Fixed
