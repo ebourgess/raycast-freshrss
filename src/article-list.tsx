@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast, getPreferenceValues, open } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, type Article } from "./api";
-import ArticleDetail, { isRead, isStarred } from "./article-detail";
+import ArticleDetail, { getArticleUrl, isRead, isStarred } from "./article-detail";
+import { saveToGoodlinks, GoodLinksError } from "./api/goodlinks";
 
 export function cleanTitle(title: string): string {
   return title
@@ -115,6 +116,37 @@ export default function ArticleList({
   const updateArticle = useCallback((articleId: string, updater: (article: Article) => Article) => {
     setArticles((prev) => prev.map((article) => (article.id === articleId ? updater(article) : article)));
   }, []);
+
+  const handleSaveToGoodlinks = async (article: Article) => {
+    const url = getArticleUrl(article);
+    if (!url) {
+      await showToast({ style: Toast.Style.Failure, title: "Error", message: "This article has no URL" });
+      return;
+    }
+    try {
+      await saveToGoodlinks({ url, title: cleanTitle(article.title) });
+      const prefs = getPreferenceValues<Preferences>();
+      if (prefs.markReadOnGoodlinks && !isRead(article)) {
+        try {
+          await api.markAsRead(article.id);
+          updateArticle(article.id, (currentArticle) => ({
+            ...currentArticle,
+            categories: [
+              ...currentArticle.categories.filter((category) => category !== "user/-/state/com.google/read"),
+              "user/-/state/com.google/read",
+            ],
+          }));
+        } catch {
+          await showToast({ style: Toast.Style.Failure, title: "Error", message: "Saved to GoodLinks but failed to mark as read" });
+          return;
+        }
+      }
+      await showToast({ style: Toast.Style.Success, title: "Saved to GoodLinks" });
+    } catch (error: unknown) {
+      const message = error instanceof GoodLinksError ? error.message : "Failed to save to GoodLinks";
+      await showToast({ style: Toast.Style.Failure, title: "Error", message });
+    }
+  };
 
   const loadArticles = useCallback(
     async (text: string, contToken?: string) => {
@@ -424,6 +456,18 @@ export default function ArticleList({
                     }
                   }}
                   shortcut={{ modifiers: ["cmd"], key: "s" }}
+                />
+                <Action
+                  title="Save to GoodLinks"
+                  icon={Icon.Link}
+                  onAction={() => handleSaveToGoodlinks(article)}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+                />
+                <Action
+                  title="Open GoodLinks"
+                  icon={Icon.ArrowRight}
+                  onAction={() => open("goodlinks://")}
+                  shortcut={{ modifiers: ["ctrl", "shift"], key: "g" }}
                 />
               </ActionPanel>
             }
