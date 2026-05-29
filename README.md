@@ -18,8 +18,10 @@ Full technical writeup can be found [here](https://ebourgess.dev/posts/building-
 - **Refresh Feeds** — Force refresh all feeds and clear the local cache
 - **Side-by-side Preview** — Read article content next to the list as you navigate
 - **Readwise Reader Integration** — Save articles to Readwise Reader with one action
+- **GoodLinks Integration** — Save articles to GoodLinks with tag support via the local REST API
 - **Auto Mark as Read** — Optionally mark articles as read when selected in the list or opened in detail view
 - **Mark Read on Readwise Save** — Optionally mark articles as read when saving to Readwise Reader
+- **Mark Read on GoodLinks Save** — Optionally mark articles as read when saving to GoodLinks
 - **Keyboard Shortcuts** — Every action has a keyboard shortcut
 
 ## Prerequisites
@@ -55,8 +57,11 @@ Configure the extension in Raycast Preferences:
 | Username    | Your FreshRSS username                           | `alice`                        |
 | API Password| Your FreshRSS **API password** (not your login)  | *(your API password)*          |
 | Readwise Token | Your Readwise access token (optional)        | *(from readwise.io/access_token)* |
+| GoodLinks API Token | Your GoodLinks API token (optional)    | *(from GoodLinks Settings → API)* |
+| GoodLinks API URL | Base URL for the GoodLinks API (optional) | `http://localhost:9428` |
 | Auto Mark as Read | Mark articles as read when selected/opened | Off (checkbox) |
 | Mark Read on Readwise Save | Mark articles as read when saving to Readwise | Off (checkbox) |
+| Mark Read on GoodLinks Save | Mark articles as read when saving to GoodLinks | Off (checkbox) |
 
 The API endpoint is constructed automatically as `{Base URL}/api/greader.php`.
 
@@ -95,6 +100,7 @@ This extension uses the FreshRSS Google Reader-compatible API:
 | `Cmd+Shift+S` | Unstar article |
 | `Cmd+Shift+W` | Save to Readwise Reader |
 | `Ctrl+Shift+W` | Open Readwise Reader |
+| `Cmd+Shift+G` | Save to GoodLinks |
 | `Cmd+Shift+R` | Refresh |
 | `Cmd+L` | Load more articles |
 
@@ -157,6 +163,12 @@ The "Browse by Category" command shows all labels/folders from your FreshRSS acc
 Set your Readwise access token in Raycast Preferences to enable the "Save to Readwise Reader" action. Articles are saved via the Readwise API (`POST https://readwise.io/api/v3/save/`) with the article URL, title, author, and summary.
 
 Enable the "Mark Read on Readwise Save" preference to automatically mark articles as read when you save them to Readwise Reader.
+
+### GoodLinks Integration
+
+Enable the GoodLinks API in GoodLinks Settings → API and copy the API token. Set the token in Raycast Preferences to enable the "Save to GoodLinks" action. When saving, a form appears where you can add comma-separated tags (existing tags are shown for reference).
+
+Enable the "Mark Read on GoodLinks Save" preference to automatically mark articles as read when you save them to GoodLinks.
 
 ### Random Article
 
