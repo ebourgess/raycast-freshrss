@@ -100,12 +100,30 @@
       "placeholder": "Enter your API password"
     },
     {
+      "name": "enableReadwise",
+      "title": "Enable Readwise",
+      "description": "Enable the Save to Readwise Reader action. You must also set your Readwise access token below.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable Save to Readwise Reader"
+    },
+    {
       "name": "readwiseToken",
       "title": "Readwise Token",
       "description": "Your Readwise access token for saving articles to Reader (optional). Get yours at readwise.io/access_token",
       "type": "password",
       "required": false,
       "placeholder": "Enter your Readwise access token"
+    },
+    {
+      "name": "enableGoodlinks",
+      "title": "Enable GoodLinks",
+      "description": "Enable the Save to GoodLinks action. You must also set your GoodLinks API token below.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable Save to GoodLinks"
     },
     {
       "name": "goodlinksApiToken",
