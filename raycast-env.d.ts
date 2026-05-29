@@ -14,8 +14,12 @@ type ExtensionPreferences = {
   "username": string,
   /** API Password - Your FreshRSS API password (not your login password) */
   "apiPassword": string,
+  /** Enable Readwise - Enable the Save to Readwise Reader action. You must also set your Readwise access token below. */
+  "enableReadwise": boolean,
   /** Readwise Token - Your Readwise access token for saving articles to Reader (optional). Get yours at readwise.io/access_token */
   "readwiseToken"?: string,
+  /** Enable GoodLinks - Enable the Save to GoodLinks action. You must also set your GoodLinks API token below. */
+  "enableGoodlinks": boolean,
   /** GoodLinks API Token - Your GoodLinks API token (optional). Enable the API in GoodLinks Settings → API and copy the token. */
   "goodlinksApiToken"?: string,
   /** GoodLinks API URL - The base URL for the GoodLinks API (defaults to http://localhost:9428) */
