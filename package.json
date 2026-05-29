@@ -126,6 +126,15 @@
       "label": "Mark Read on Readwise Save"
     },
     {
+      "name": "markReadOnGoodlinks",
+      "title": "Mark Read on GoodLinks Save",
+      "description": "Automatically mark articles as read when saving to GoodLinks",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Mark Read on GoodLinks Save"
+    },
+    {
       "name": "debugLogging",
       "title": "Debug Logging",
       "description": "Enable debug logging to console for troubleshooting API requests",
