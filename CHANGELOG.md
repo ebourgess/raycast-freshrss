@@ -2,6 +2,10 @@
 
 All notable changes to the FreshRSS Raycast extension will be documented in this file.
 
+## [1.3.1] - 2026-05-29
+
+-  Modified raycast-env.d.ts to hold the hide/add toggle
+
 ## [1.3.0] - 2026-05-29
 
 ### Added
@@ -9,7 +13,7 @@ All notable changes to the FreshRSS Raycast extension will be documented in this
 - Enable/Disable Readwise Reader integration — new "Enable Save to Readwise Reader" toggle preference; the Save and Open actions are hidden when disabled or when no token is set
 - Enable/Disable GoodLinks integration — new "Enable Save to GoodLinks" toggle preference; the Save action is hidden when disabled or when no token is set
 
-## [1.2.0] - {PR_MERGE_DATE}
+## [1.2.0] - 2026-05-29
 
 ### Added
 
@@ -18,7 +22,7 @@ All notable changes to the FreshRSS Raycast extension will be documented in this
 - GoodLinks API Token and API URL preferences
 - Mark Read on GoodLinks Save preference — automatically mark articles as read when saving to GoodLinks
 
-## [1.1.1] - {PR_MERGE_DATE}
+## [1.1.1] - 2026-05-26
 
 ### Fixed
 
