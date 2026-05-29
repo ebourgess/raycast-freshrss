@@ -9,7 +9,7 @@ class ReadwiseError extends Error {
 
 export function hasReadwiseToken(): boolean {
   const prefs = getPreferenceValues<Preferences>();
-  return !!prefs.readwiseToken?.trim();
+  return !!prefs.enableReadwise && !!prefs.readwiseToken?.trim();
 }
 
 export async function saveToReadwise(params: {

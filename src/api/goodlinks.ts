@@ -19,7 +19,7 @@ function getApiConfig(): { baseUrl: string; token: string } {
 
 export function hasGoodlinksToken(): boolean {
   const prefs = getPreferenceValues<Preferences>();
-  return !!prefs.goodlinksApiToken?.trim();
+  return !!prefs.enableGoodlinks && !!prefs.goodlinksApiToken?.trim();
 }
 
 export async function saveToGoodlinks(params: {
