@@ -3,6 +3,7 @@ import { Detail, Action, ActionPanel, Icon, getPreferenceValues, showToast, Toas
 import { getAllArticles, markArticleRead, markArticleUnread, starArticle, unstarArticle, FreshRSSAuthError, FreshRSSApiError } from "./api/freshrss";
 import { saveToReadwise, hasReadwiseToken, ReadwiseError } from "./api/readwise";
 import SaveToGoodlinksForm from "./components/SaveToGoodlinksForm";
+import { hasGoodlinksToken } from "./api/goodlinks";
 import type { Article } from "./api/types";
 
 async function handleToggleRead(article: Article, onDone?: () => void) {
@@ -164,7 +165,7 @@ export default function RandomArticleCommand() {
           {article.url ? (
             <Action.CopyToClipboard content={article.url} title="Copy URL" shortcut={{ modifiers: ["cmd"], key: "c" }} />
           ) : null}
-          {article.url ? (
+          {article.url && hasReadwiseToken() ? (
             <Action
               title="Save to Readwise Reader"
               icon={Icon.Bookmark}
@@ -177,7 +178,7 @@ export default function RandomArticleCommand() {
               shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
             />
           ) : null}
-          {article.url ? (
+          {article.url && hasReadwiseToken() ? (
             <Action
               title="Open Readwise Reader"
               icon={Icon.ArrowRight}
@@ -185,7 +186,7 @@ export default function RandomArticleCommand() {
               shortcut={{ modifiers: ["ctrl", "shift"], key: "w" }}
             />
           ) : null}
-          {article.url ? (
+          {article.url && hasGoodlinksToken() ? (
             <Action.Push
               title="Save to GoodLinks"
               icon={Icon.Link}
