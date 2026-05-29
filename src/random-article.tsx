@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Detail, Action, ActionPanel, Icon, getPreferenceValues, showToast, Toast, open, openCommandPreferences } from "@raycast/api";
 import { getAllArticles, markArticleRead, markArticleUnread, starArticle, unstarArticle, FreshRSSAuthError, FreshRSSApiError } from "./api/freshrss";
 import { saveToReadwise, hasReadwiseToken, ReadwiseError } from "./api/readwise";
+import SaveToGoodlinksForm from "./components/SaveToGoodlinksForm";
 import type { Article } from "./api/types";
 
 async function handleToggleRead(article: Article, onDone?: () => void) {
@@ -182,6 +183,24 @@ export default function RandomArticleCommand() {
               icon={Icon.ArrowRight}
               onAction={() => open("https://readwise.io/reader")}
               shortcut={{ modifiers: ["ctrl", "shift"], key: "w" }}
+            />
+          ) : null}
+          {article.url ? (
+            <Action.Push
+              title="Save to GoodLinks"
+              icon={Icon.Link}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+              target={
+                <SaveToGoodlinksForm
+                  url={article.url}
+                  title={article.title}
+                  summary={article.summary}
+                  onMarkRead={async () => {
+                    await markArticleRead(article.id);
+                    setLocalIsRead(true);
+                  }}
+                />
+              }
             />
           ) : null}
           {!localIsRead ? (

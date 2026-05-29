@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, type Article } from "./api";
-import ArticleDetail, { isRead, isStarred } from "./article-detail";
+import ArticleDetail, { getArticleUrl, isRead, isStarred } from "./article-detail";
+import SaveToGoodlinksForm from "./components/SaveToGoodlinksForm";
 
 export function cleanTitle(title: string): string {
   return title
@@ -424,6 +425,27 @@ export default function ArticleList({
                     }
                   }}
                   shortcut={{ modifiers: ["cmd"], key: "s" }}
+                />
+                <Action.Push
+                  title="Save to GoodLinks"
+                  icon={Icon.Link}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+                  target={
+                    <SaveToGoodlinksForm
+                      url={getArticleUrl(article)}
+                      title={cleanTitle(article.title)}
+                      onMarkRead={async () => {
+                        await api.markAsRead(article.id);
+                        updateArticle(article.id, (currentArticle) => ({
+                          ...currentArticle,
+                          categories: [
+                            ...currentArticle.categories.filter((category) => category !== "user/-/state/com.google/read"),
+                            "user/-/state/com.google/read",
+                          ],
+                        }));
+                      }}
+                    />
+                  }
                 />
               </ActionPanel>
             }

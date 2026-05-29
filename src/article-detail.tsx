@@ -4,6 +4,7 @@ import { Action, ActionPanel, Color, Detail, Icon, Toast, showToast } from "@ray
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import { api, type Article } from "./api";
 import { cleanTitle } from "./article-list";
+import SaveToGoodlinksForm from "./components/SaveToGoodlinksForm";
 
 const nhm = new NodeHtmlMarkdown({
   bulletMarker: "-",
@@ -193,6 +194,26 @@ export default function ArticleDetail({ article, onToggleRead, onToggleStar, ext
               onAction={handleToggleStar}
               shortcut={{ modifiers: ["cmd"], key: "s" }}
             />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Save">
+            {url ? (
+              <Action.Push
+                title="Save to GoodLinks"
+                icon={Icon.Link}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+                target={
+                  <SaveToGoodlinksForm
+                    url={url}
+                    title={cleanTitle(article.title)}
+                    onMarkRead={async () => {
+                      await api.markAsRead(article.id);
+                      setRead(true);
+                      onToggleRead?.(article, true);
+                    }}
+                  />
+                }
+              />
+            ) : null}
           </ActionPanel.Section>
           {extraActions ? <ActionPanel.Section>{extraActions}</ActionPanel.Section> : null}
         </ActionPanel>

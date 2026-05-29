@@ -16,10 +16,16 @@ type ExtensionPreferences = {
   "apiPassword": string,
   /** Readwise Token - Your Readwise access token for saving articles to Reader (optional). Get yours at readwise.io/access_token */
   "readwiseToken"?: string,
+  /** GoodLinks API Token - Your GoodLinks API token (optional). Enable the API in GoodLinks Settings → API and copy the token. */
+  "goodlinksApiToken"?: string,
+  /** GoodLinks API URL - The base URL for the GoodLinks API (defaults to http://localhost:9428) */
+  "goodlinksApiUrl"?: string,
   /** Auto Mark as Read - Automatically mark articles as read when you open them */
   "autoMarkAsRead": boolean,
   /** Mark Read on Readwise Save - Automatically mark articles as read when saving to Readwise Reader */
   "markReadOnReadwise": boolean,
+  /** Mark Read on GoodLinks Save - Automatically mark articles as read when saving to GoodLinks */
+  "markReadOnGoodlinks": boolean,
   /** Debug Logging - Enable debug logging to console for troubleshooting API requests */
   "debugLogging": boolean
 }

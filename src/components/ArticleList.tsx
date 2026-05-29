@@ -11,6 +11,8 @@ import {
   FreshRSSApiError,
 } from "../api/freshrss";
 import { saveToReadwise, hasReadwiseToken, ReadwiseError } from "../api/readwise";
+import { hasGoodlinksToken } from "../api/goodlinks";
+import SaveToGoodlinksForm from "./SaveToGoodlinksForm";
 
 function formatDate(dateStr?: string): string {
   if (!dateStr) return "";
@@ -288,6 +290,24 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
               shortcut={{ modifiers: ["ctrl", "shift"], key: "w" }}
             />
           ) : null}
+          {article.url ? (
+            <Action.Push
+              title="Save to GoodLinks"
+              icon={Icon.Link}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+              target={
+                <SaveToGoodlinksForm
+                  url={article.url}
+                  title={article.title}
+                  summary={article.summary}
+                  onMarkRead={async () => {
+                    await markArticleRead(article.id);
+                    callbacks.onToggleRead?.(article.id, true);
+                  }}
+                />
+              }
+            />
+          ) : null}
           {mode !== "starred" && !article.isRead ? (
             <Action
               title="Mark as Read"
@@ -406,6 +426,25 @@ function ArticleDetailView({ article, callbacks }: { article: Article; callbacks
               icon={Icon.ArrowRight}
               onAction={handleOpenInReadwise}
               shortcut={{ modifiers: ["ctrl", "shift"], key: "w" }}
+            />
+          ) : null}
+          {article.url ? (
+            <Action.Push
+              title="Save to GoodLinks"
+              icon={Icon.Link}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+              target={
+                <SaveToGoodlinksForm
+                  url={article.url}
+                  title={article.title}
+                  summary={article.summary}
+                  onMarkRead={async () => {
+                    await markArticleRead(article.id);
+                    setLocalIsRead(true);
+                    callbacks.onToggleRead?.(article.id, true);
+                  }}
+                />
+              }
             />
           ) : null}
           {localIsRead !== undefined && !localIsRead ? (
