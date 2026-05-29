@@ -274,7 +274,7 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
             />
           ) : null}
           
-          {article.url ? (
+          {article.url && hasReadwiseToken() ? (
             <Action
               title="Save to Readwise Reader"
               icon={Icon.Bookmark}
@@ -282,7 +282,7 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
               shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
             />
           ) : null}
-          {article.url ? (
+          {article.url && hasReadwiseToken() ? (
             <Action
               title="Open Readwise Reader"
               icon={Icon.ArrowRight}
@@ -290,7 +290,7 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
               shortcut={{ modifiers: ["ctrl", "shift"], key: "w" }}
             />
           ) : null}
-          {article.url ? (
+          {article.url && hasGoodlinksToken() ? (
             <Action.Push
               title="Save to GoodLinks"
               icon={Icon.Link}
@@ -412,7 +412,7 @@ function ArticleDetailView({ article, callbacks }: { article: Article; callbacks
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
           ) : null}
-          {article.url ? (
+          {article.url && hasReadwiseToken() ? (
             <Action
               title="Save to Readwise Reader"
               icon={Icon.Bookmark}
@@ -420,7 +420,7 @@ function ArticleDetailView({ article, callbacks }: { article: Article; callbacks
               shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
             />
           ) : null}
-          {article.url ? (
+          {article.url && hasReadwiseToken() ? (
             <Action
               title="Open Readwise Reader"
               icon={Icon.ArrowRight}
@@ -428,7 +428,7 @@ function ArticleDetailView({ article, callbacks }: { article: Article; callbacks
               shortcut={{ modifiers: ["ctrl", "shift"], key: "w" }}
             />
           ) : null}
-          {article.url ? (
+          {article.url && hasGoodlinksToken() ? (
             <Action.Push
               title="Save to GoodLinks"
               icon={Icon.Link}
