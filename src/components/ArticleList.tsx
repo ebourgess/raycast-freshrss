@@ -11,6 +11,7 @@ import {
   FreshRSSApiError,
 } from "../api/freshrss";
 import { saveToReadwise, hasReadwiseToken, ReadwiseError } from "../api/readwise";
+import { saveToGoodlinks, GoodLinksError } from "../api/goodlinks";
 
 function formatDate(dateStr?: string): string {
   if (!dateStr) return "";
@@ -113,6 +114,38 @@ async function handleSaveToReadwise(article: Article, callbacks: ArticleActionCa
 
 async function handleOpenInReadwise() {
   await open("https://readwise.io/reader");
+}
+
+async function handleSaveToGoodlinks(article: Article, callbacks: ArticleActionCallbacks) {
+  if (!article.url) {
+    await showToast({ style: Toast.Style.Failure, title: "Error", message: "This article has no URL" });
+    return;
+  }
+  try {
+    await saveToGoodlinks({
+      url: article.url,
+      title: article.title,
+    });
+    const prefs = getPreferenceValues<Preferences>();
+    if (prefs.markReadOnGoodlinks && !article.isRead) {
+      try {
+        await markArticleRead(article.id);
+        callbacks.onToggleRead?.(article.id, true);
+      } catch {
+        await showToast({ style: Toast.Style.Failure, title: "Error", message: "Saved to GoodLinks but failed to mark as read" });
+        return;
+      }
+    }
+    callbacks.onRefresh?.();
+    await showToast({ style: Toast.Style.Success, title: "Saved to GoodLinks" });
+  } catch (error: unknown) {
+    const message = error instanceof GoodLinksError ? error.message : "Failed to save to GoodLinks";
+    await showToast({ style: Toast.Style.Failure, title: "Error", message });
+  }
+}
+
+async function handleOpenInGoodlinks() {
+  await open("goodlinks://");
 }
 
 type ArticleListProps = {
@@ -288,6 +321,22 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
               shortcut={{ modifiers: ["ctrl", "shift"], key: "w" }}
             />
           ) : null}
+          {article.url ? (
+            <Action
+              title="Save to GoodLinks"
+              icon={Icon.Link}
+              onAction={() => handleSaveToGoodlinks(article, callbacks)}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+            />
+          ) : null}
+          {article.url ? (
+            <Action
+              title="Open GoodLinks"
+              icon={Icon.ArrowRight}
+              onAction={handleOpenInGoodlinks}
+              shortcut={{ modifiers: ["ctrl", "shift"], key: "g" }}
+            />
+          ) : null}
           {mode !== "starred" && !article.isRead ? (
             <Action
               title="Mark as Read"
@@ -406,6 +455,22 @@ function ArticleDetailView({ article, callbacks }: { article: Article; callbacks
               icon={Icon.ArrowRight}
               onAction={handleOpenInReadwise}
               shortcut={{ modifiers: ["ctrl", "shift"], key: "w" }}
+            />
+          ) : null}
+          {article.url ? (
+            <Action
+              title="Save to GoodLinks"
+              icon={Icon.Link}
+              onAction={() => handleSaveToGoodlinks(article, callbacks)}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+            />
+          ) : null}
+          {article.url ? (
+            <Action
+              title="Open GoodLinks"
+              icon={Icon.ArrowRight}
+              onAction={handleOpenInGoodlinks}
+              shortcut={{ modifiers: ["ctrl", "shift"], key: "g" }}
             />
           ) : null}
           {localIsRead !== undefined && !localIsRead ? (

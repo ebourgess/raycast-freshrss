@@ -20,6 +20,8 @@ type ExtensionPreferences = {
   "autoMarkAsRead": boolean,
   /** Mark Read on Readwise Save - Automatically mark articles as read when saving to Readwise Reader */
   "markReadOnReadwise": boolean,
+  /** Mark Read on GoodLinks Save - Automatically mark articles as read when saving to GoodLinks */
+  "markReadOnGoodlinks": boolean,
   /** Debug Logging - Enable debug logging to console for troubleshooting API requests */
   "debugLogging": boolean
 }
