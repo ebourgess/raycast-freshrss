@@ -17,8 +17,8 @@ Full technical writeup can be found [here](https://ebourgess.dev/posts/building-
 - **Random Article** — Open a random article from your feeds for serendipitous reading
 - **Refresh Feeds** — Force refresh all feeds and clear the local cache
 - **Side-by-side Preview** — Read article content next to the list as you navigate
-- **Readwise Reader Integration** — Save articles to Readwise Reader with one action
-- **GoodLinks Integration** — Save articles to GoodLinks with tag support via the local REST API
+- **Readwise Reader Integration** — Save articles to Readwise Reader with one action (togglable via preferences)
+- **GoodLinks Integration** — Save articles to GoodLinks with tag support via the local REST API (togglable via preferences)
 - **Auto Mark as Read** — Optionally mark articles as read when selected in the list or opened in detail view
 - **Mark Read on Readwise Save** — Optionally mark articles as read when saving to Readwise Reader
 - **Mark Read on GoodLinks Save** — Optionally mark articles as read when saving to GoodLinks
@@ -56,9 +56,11 @@ Configure the extension in Raycast Preferences:
 | Base URL    | Your FreshRSS instance URL (without `/api/`)    | `https://your-freshrss-instance`   |
 | Username    | Your FreshRSS username                           | `alice`                        |
 | API Password| Your FreshRSS **API password** (not your login)  | *(your API password)*          |
-| Readwise Token | Your Readwise access token (optional)        | *(from readwise.io/access_token)* |
-| GoodLinks API Token | Your GoodLinks API token (optional)    | *(from GoodLinks Settings → API)* |
-| GoodLinks API URL | Base URL for the GoodLinks API (optional) | `http://localhost:9428` |
+| Enable Readwise | Toggle the Save to Readwise Reader action on/off | Off (checkbox) |
+| Readwise Token | Your Readwise access token (shown when enabled)  | *(from readwise.io/access_token)* |
+| Enable GoodLinks | Toggle the Save to GoodLinks action on/off    | Off (checkbox) |
+| GoodLinks API Token | Your GoodLinks API token (shown when enabled) | *(from GoodLinks Settings → API)* |
+| GoodLinks API URL | Base URL for the GoodLinks API (shown when enabled) | `http://localhost:9428` |
 | Auto Mark as Read | Mark articles as read when selected/opened | Off (checkbox) |
 | Mark Read on Readwise Save | Mark articles as read when saving to Readwise | Off (checkbox) |
 | Mark Read on GoodLinks Save | Mark articles as read when saving to GoodLinks | Off (checkbox) |
@@ -160,13 +162,13 @@ The "Browse by Category" command shows all labels/folders from your FreshRSS acc
 
 ### Readwise Reader Integration
 
-Set your Readwise access token in Raycast Preferences to enable the "Save to Readwise Reader" action. Articles are saved via the Readwise API (`POST https://readwise.io/api/v3/save/`) with the article URL, title, author, and summary.
+Enable the "Enable Save to Readwise Reader" toggle in Raycast Preferences and set your Readwise access token to activate the "Save to Readwise Reader" and "Open Readwise Reader" actions. The actions are hidden when the toggle is off or no token is configured.
 
 Enable the "Mark Read on Readwise Save" preference to automatically mark articles as read when you save them to Readwise Reader.
 
 ### GoodLinks Integration
 
-Enable the GoodLinks API in GoodLinks Settings → API and copy the API token. Set the token in Raycast Preferences to enable the "Save to GoodLinks" action. When saving, a form appears where you can add comma-separated tags (existing tags are shown for reference).
+Enable the "Enable Save to GoodLinks" toggle in Raycast Preferences, then enable the GoodLinks API in GoodLinks Settings → API and copy the API token into the extension preferences. The "Save to GoodLinks" action appears only when the toggle is on and a token is set. When saving, a form appears where you can add comma-separated tags (existing tags are shown for reference).
 
 Enable the "Mark Read on GoodLinks Save" preference to automatically mark articles as read when you save them to GoodLinks.
 
