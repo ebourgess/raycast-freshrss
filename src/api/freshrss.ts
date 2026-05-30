@@ -281,7 +281,20 @@ function buildFeedIconMap(feeds: Feed[]): Map<string, string> {
   return map;
 }
 
-function parseStreamItem(item: FreshRSSStreamItem, iconMap?: Map<string, string>): Article {
+function buildFeedCategoryMap(feeds: Feed[]): Map<string, string[]> {
+  const map = new Map<string, string[]>();
+  for (const feed of feeds) {
+    if (feed.categories && feed.id) {
+      const labels = feed.categories.map((c) => c.label);
+      const numericId = feed.id.replace("feed/", "");
+      map.set(numericId, labels);
+      map.set(feed.id, labels);
+    }
+  }
+  return map;
+}
+
+function parseStreamItem(item: FreshRSSStreamItem, iconMap?: Map<string, string>, categoryMap?: Map<string, string[]>): Article {
   const articleUrl =
     item.alternate?.find((a: { href: string; type: string }) => a.type === "text/html")?.href ||
     item.alternate?.[0]?.href ||
@@ -302,6 +315,18 @@ function parseStreamItem(item: FreshRSSStreamItem, iconMap?: Map<string, string>
     feedIconUrl = iconMap.get(item.origin.streamId);
   }
 
+  const labelCategories = categories
+    .filter((c) => c.startsWith("user/-/label/"))
+    .map((c) => c.replace("user/-/label/", ""));
+
+  let feedCategories = labelCategories;
+  if (feedCategories.length === 0 && categoryMap && item.origin?.streamId) {
+    const feedCats = categoryMap.get(item.origin.streamId);
+    if (feedCats && feedCats.length > 0) {
+      feedCategories = feedCats;
+    }
+  }
+
   return {
     id: item.id,
     title: item.title || "Untitled",
@@ -316,6 +341,7 @@ function parseStreamItem(item: FreshRSSStreamItem, iconMap?: Map<string, string>
     content: item.content?.content || item.summary?.content,
     isRead,
     isStarred,
+    feedCategories: feedCategories.length > 0 ? feedCategories : undefined,
   };
 }
 
@@ -404,6 +430,7 @@ export async function getUnreadCounts(): Promise<Map<string, number>> {
 export async function getArticlesByCategory(categoryId: string, continuation?: string): Promise<ArticleFetchResult> {
   const feeds = await getFeeds();
   const iconMap = buildFeedIconMap(feeds);
+  const categoryMap = buildFeedCategoryMap(feeds);
 
   const params: Record<string, string> = {
     output: "json",
@@ -417,7 +444,7 @@ export async function getArticlesByCategory(categoryId: string, continuation?: s
   const text = await request(`/reader/api/0/stream/contents/${categoryId}`, { params });
 
   const data: FreshRSSStreamContentsResponse = JSON.parse(text);
-  const articles = (data.items || []).map((item: FreshRSSStreamItem) => parseStreamItem(item, iconMap));
+  const articles = (data.items || []).map((item: FreshRSSStreamItem) => parseStreamItem(item, iconMap, categoryMap));
 
   return {
     articles,
@@ -428,6 +455,7 @@ export async function getArticlesByCategory(categoryId: string, continuation?: s
 export async function getArticlesByFeed(feedId: string, continuation?: string): Promise<ArticleFetchResult> {
   const feeds = await getFeeds();
   const iconMap = buildFeedIconMap(feeds);
+  const categoryMap = buildFeedCategoryMap(feeds);
 
   const params: Record<string, string> = {
     output: "json",
@@ -441,7 +469,7 @@ export async function getArticlesByFeed(feedId: string, continuation?: string): 
   const text = await request(`/reader/api/0/stream/contents/${feedId}`, { params });
 
   const data: FreshRSSStreamContentsResponse = JSON.parse(text);
-  const articles = (data.items || []).map((item: FreshRSSStreamItem) => parseStreamItem(item, iconMap));
+  const articles = (data.items || []).map((item: FreshRSSStreamItem) => parseStreamItem(item, iconMap, categoryMap));
 
   return {
     articles,
@@ -544,6 +572,7 @@ async function fetchArticleStream(
 ): Promise<ArticleFetchResult> {
   const feeds = await getFeeds();
   const iconMap = buildFeedIconMap(feeds);
+  const categoryMap = buildFeedCategoryMap(feeds);
 
   const params: Record<string, string> = {
     output: "json",
@@ -558,7 +587,7 @@ async function fetchArticleStream(
   const text = await request(`/reader/api/0/stream/contents/${streamPath}`, { params });
 
   const data: FreshRSSStreamContentsResponse = JSON.parse(text);
-  const articles = (data.items || []).map((item: FreshRSSStreamItem) => parseStreamItem(item, iconMap));
+  const articles = (data.items || []).map((item: FreshRSSStreamItem) => parseStreamItem(item, iconMap, categoryMap));
 
   return {
     articles,

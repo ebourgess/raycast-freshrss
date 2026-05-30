@@ -39,6 +39,12 @@ export function isStarred(article: Article): boolean {
   return article.categories?.some((c) => c.endsWith("/state/com.google/starred")) ?? false;
 }
 
+export function getFeedCategories(article: Article): string[] {
+  return (article.categories ?? [])
+    .filter((c) => c.startsWith("user/-/label/"))
+    .map((c) => c.replace("user/-/label/", ""));
+}
+
 export function getArticleUrl(article: Article): string {
   return article.alternate?.[0]?.href ?? "";
 }
@@ -79,6 +85,7 @@ export default function ArticleDetail({ article, onToggleRead, onToggleStar, ext
   const [read, setRead] = useState(isRead(article));
   const [starred, setStarred] = useState(isStarred(article));
   const url = getArticleUrl(article);
+  const feedCategories = getFeedCategories(article);
 
   useEffect(() => {
     if (!isRead(article)) {
@@ -148,6 +155,13 @@ export default function ArticleDetail({ article, onToggleRead, onToggleStar, ext
         <Detail.Metadata>
           <Detail.Metadata.Label title="Title" text={displayTitle} />
           <Detail.Metadata.Label title="Source" text={article.origin?.title || "—"} />
+          {feedCategories.length > 0 && (
+            <Detail.Metadata.TagList title="Categories">
+              {feedCategories.map((cat) => (
+                <Detail.Metadata.TagList.Item key={cat} text={cat} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
           <Detail.Metadata.Label title="Author" text={article.author || "—"} />
           <Detail.Metadata.Label
             title="Published"

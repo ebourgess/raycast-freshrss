@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, type Article } from "./api";
-import ArticleDetail, { getArticleUrl, isRead, isStarred } from "./article-detail";
+import ArticleDetail, { getArticleUrl, getFeedCategories, isRead, isStarred } from "./article-detail";
 import SaveToGoodlinksForm from "./components/SaveToGoodlinksForm";
 
 export function cleanTitle(title: string): string {
@@ -279,11 +279,13 @@ export default function ArticleList({
       {articles.map((article) => {
         const read = isRead(article);
         const starred = isStarred(article);
+        const feedCategories = getFeedCategories(article);
         const sourceTitle = formatSourceTitle(article.origin?.title);
         const compactSource = compactSourceTitle(article.origin?.title);
         const cleanedTitle = cleanTitle(article.title) || "Untitled";
         const compactTitle = truncateText(cleanedTitle, 72);
         const compactSourceLabel = compactSource ? truncateText(compactSource, 16) : undefined;
+        const categoryLabel = feedCategories.length > 0 ? truncateText(feedCategories[0], 16) : undefined;
         const relativeTime = formatRelativeTime(article.published);
         const absoluteTime = article.published ? new Date(article.published * 1000).toLocaleString("en-US") : undefined;
 
@@ -298,6 +300,15 @@ export default function ArticleList({
             title={compactTitle}
             accessories={
               [
+                categoryLabel
+                  ? {
+                      text: {
+                        value: categoryLabel,
+                        color: Color.Blue,
+                      },
+                      tooltip: feedCategories.join(", "),
+                    }
+                  : null,
                 compactSourceLabel
                   ? {
                       text: {

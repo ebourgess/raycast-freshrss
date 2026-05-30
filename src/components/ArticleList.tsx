@@ -222,7 +222,7 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
     accessories.push({ text: formatDate(article.publishedAt) });
   }
 
-  const subtitle = [article.feedTitle, article.author].filter(Boolean).join(" · ");
+  const subtitle = [article.feedCategories?.[0], article.feedTitle, article.author].filter(Boolean).join(" · ");
 
   const contentBody = article.content || article.summary || "No content available.";
   const previewMarkdown = `## ${article.title || "Untitled"}\n\n${contentBody}`;
@@ -230,6 +230,13 @@ function ArticleListItem({ article, mode, callbacks }: ArticleListItemProps) {
   const metadata = (
     <List.Item.Detail.Metadata>
       {article.feedTitle ? <List.Item.Detail.Metadata.Label title="Feed" text={article.feedTitle} /> : null}
+      {article.feedCategories && article.feedCategories.length > 0 && (
+        <List.Item.Detail.Metadata.TagList title="Categories">
+          {article.feedCategories.map((cat) => (
+            <List.Item.Detail.Metadata.TagList.Item key={cat} text={cat} />
+          ))}
+        </List.Item.Detail.Metadata.TagList>
+      )}
       {article.author ? <List.Item.Detail.Metadata.Label title="Author" text={article.author} /> : null}
       {article.publishedAt ? <List.Item.Detail.Metadata.Label title="Published" text={new Date(article.publishedAt).toLocaleString()} /> : null}
       {article.updatedAt ? <List.Item.Detail.Metadata.Label title="Updated" text={new Date(article.updatedAt).toLocaleString()} /> : null}
@@ -380,6 +387,13 @@ function ArticleDetailView({ article, callbacks }: { article: Article; callbacks
   const metadata = (
     <Detail.Metadata>
       {article.feedTitle ? <Detail.Metadata.Label title="Feed" text={article.feedTitle} /> : null}
+      {article.feedCategories && article.feedCategories.length > 0 && (
+        <Detail.Metadata.TagList title="Categories">
+          {article.feedCategories.map((cat) => (
+            <Detail.Metadata.TagList.Item key={cat} text={cat} />
+          ))}
+        </Detail.Metadata.TagList>
+      )}
       {article.author ? <Detail.Metadata.Label title="Author" text={article.author} /> : null}
       {article.publishedAt ? <Detail.Metadata.Label title="Published" text={new Date(article.publishedAt).toLocaleString()} /> : null}
       {article.updatedAt ? <Detail.Metadata.Label title="Updated" text={new Date(article.updatedAt).toLocaleString()} /> : null}

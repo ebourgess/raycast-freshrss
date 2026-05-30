@@ -22,6 +22,7 @@ export type Article = {
   content?: string;
   isRead?: boolean;
   isStarred?: boolean;
+  feedCategories?: string[];
 };
 
 export type ArticleListMode = "unread" | "read" | "starred" | "mixed";

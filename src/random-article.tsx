@@ -142,6 +142,13 @@ export default function RandomArticleCommand() {
   const metadata = (
     <Detail.Metadata>
       {article.feedTitle ? <Detail.Metadata.Label title="Feed" text={article.feedTitle} /> : null}
+      {article.feedCategories && article.feedCategories.length > 0 && (
+        <Detail.Metadata.TagList title="Categories">
+          {article.feedCategories.map((cat) => (
+            <Detail.Metadata.TagList.Item key={cat} text={cat} />
+          ))}
+        </Detail.Metadata.TagList>
+      )}
       {article.author ? <Detail.Metadata.Label title="Author" text={article.author} /> : null}
       {article.publishedAt ? <Detail.Metadata.Label title="Published" text={new Date(article.publishedAt).toLocaleString()} /> : null}
       {article.updatedAt ? <Detail.Metadata.Label title="Updated" text={new Date(article.updatedAt).toLocaleString()} /> : null}
