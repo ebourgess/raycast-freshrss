@@ -2,6 +2,13 @@
 
 All notable changes to the FreshRSS Raycast extension will be documented in this file.
 
+## [1.3.2] - 2026-05-30
+
+### Fixed
+
+- Show article categories in all views — added category display to the article list subtitle, list detail metadata, random article detail, and legacy article list
+- Use feed subscription data as fallback for categories when the API doesn't include `user/-/label/` entries in article data
+
 ## [1.3.1] - 2026-05-29
 
 -  Modified raycast-env.d.ts to hold the hide/add toggle
